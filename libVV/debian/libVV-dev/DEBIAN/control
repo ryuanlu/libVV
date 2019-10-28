@@ -1,0 +1,10 @@
+Package: libVV-dev
+Version: 0.1-1
+Architecture: amd64
+Maintainer: 盧瑞元 (Ruei-Yuan Lu) <RueiYuan.Lu@gmail.com>
+Depends: libVV
+Section: main/libdevel
+Priority: optional
+Homepage: https://github.com/ryuanlu/libVV
+Description: Volume Visualization library
+ libVV is a Volume Visualization library written by 盧瑞元 (Ruei-Yuan Lu).
