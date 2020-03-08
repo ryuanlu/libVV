@@ -14,7 +14,7 @@ clean: $(TARGET)_clean
 	@echo "\tCLEAN\t$(BUILD_DIR)"
 	rm -rf $(BUILD_DIR)
 
-$(TARGET)_src_files:=context.c
+$(TARGET)_src_files:=context.c gles.c
 $(TARGET)_cflags:=-fPIC -Wall -Iinclude/libVV -g
 $(TARGET)_ldflags:=-shared -Wall -Wl,-soname,$(TARGET) -lEGL -g
 
