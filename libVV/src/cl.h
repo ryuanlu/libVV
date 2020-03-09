@@ -1,6 +1,7 @@
 #ifndef __CL_H__
 #define __CL_H__
 
+#define CL_TARGET_OPENCL_VERSION 200
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 #include <CL/cl.h>
 
