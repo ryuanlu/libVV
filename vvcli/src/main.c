@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "VV.h"
 
@@ -5,6 +6,7 @@ int main(int argc, char** argv)
 {
 	vv_context* context = NULL;
 	vv_memory* memory = NULL;
+	void* ptr = NULL;
 
 	vv_context_create(&context);
 
@@ -53,6 +55,10 @@ int main(int argc, char** argv)
 		NULL
 	);
 
+	vv_memory_map(memory, &ptr);
+	fprintf(stderr, "ptr = %p\n", ptr);
+	vv_memory_unmap(memory, &ptr);
+	fprintf(stderr, "ptr = %p\n", ptr);
 	vv_memory_destroy(&memory);
 
 	vv_context_destroy(&context);

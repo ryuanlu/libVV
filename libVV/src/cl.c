@@ -90,4 +90,19 @@ done:
 }
 
 
+int cl_buffer_map(struct vv_memory* memory, void** ptr)
+{
+	cl_int err = 0;
+	*ptr = clEnqueueMapBuffer(memory->desc.context->cl->queue, memory->data, CL_TRUE, CL_MAP_READ | CL_MAP_WRITE, 0, memory->desc.slice_pitch * memory->desc.depth, 0, NULL, NULL, &err);
+	return err;
+}
+
+
+int cl_buffer_unmap(struct vv_memory* memory, void** ptr)
+{
+	int result = 0;
+	result = clEnqueueUnmapMemObject(memory->desc.context->cl->queue, memory->data, *ptr, memory->desc.slice_pitch * memory->desc.depth, NULL, NULL);
+	*ptr = NULL;
+	return result;
+}
 

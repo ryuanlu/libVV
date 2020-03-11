@@ -18,5 +18,7 @@ int	cl_context_destroy	(struct cl_context** context);
 int	cl_buffer_create	(struct vv_memory* memory, void* extra);
 int	cl_buffer_destroy	(struct vv_memory* memory);
 
+int	cl_buffer_map	(struct vv_memory* memory, void** ptr);
+int	cl_buffer_unmap	(struct vv_memory* memory, void** ptr);
 
 #endif /* __CL_H__ */

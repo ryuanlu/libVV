@@ -6,7 +6,7 @@
 #include "gles.h"
 #include "cl.h"
 
-#define if_failed(expr, error_code, goto_label) if(!(expr)) { fprintf(stderr, "%s:%d:\t%s() returns %d\n", __FILE__, __LINE__, __FUNCTION__, error_code); result = error_code; goto goto_label; }
+#define if_failed(expr, error_code, goto_label) do {if(!(expr)) { fprintf(stderr, "%s:%d:\t%s() returns %d\n", __FILE__, __LINE__, __FUNCTION__, error_code); result = error_code; goto goto_label; }}while(0)
 
 
 static int host_memory_create(struct vv_memory* memory, void* extra)
@@ -19,6 +19,20 @@ static int host_memory_create(struct vv_memory* memory, void* extra)
 static int host_memory_destroy(struct vv_memory* memory)
 {
 	free(memory->data);
+	return 0;
+}
+
+
+static int host_memory_map(struct vv_memory* memory, void** ptr)
+{
+	*ptr = memory->data;
+	return memory->data == NULL;
+}
+
+
+static int host_memory_unmap(struct vv_memory* memory, void** ptr)
+{
+	*ptr = NULL;
 	return 0;
 }
 
@@ -43,6 +57,7 @@ static PFN_vv_memory_create vv_memory_create_table[] =
 	gles_texture_create,
 	NULL,
 	cl_buffer_create,
+	NULL,
 };
 
 
@@ -53,6 +68,29 @@ static PFN_vv_memory_destroy vv_memory_destroy_table[] =
 	gles_texture_destroy,
 	NULL,
 	cl_buffer_destroy,
+	NULL,
+};
+
+
+static PFN_vv_memory_map vv_memory_map_table[] =
+{
+	host_memory_map,
+	host_memory_map,
+	NULL,
+	NULL,
+	cl_buffer_map,
+	NULL,
+};
+
+
+static PFN_vv_memory_unmap vv_memory_unmap_table[] =
+{
+	host_memory_unmap,
+	host_memory_unmap,
+	NULL,
+	NULL,
+	cl_buffer_unmap,
+	NULL,
 };
 
 
@@ -79,7 +117,8 @@ int vv_memory_create(struct vv_memory** memory, const struct vv_memory_desc* des
 	new_memory->desc.row_pitch = desc->row_pitch > 0 ? desc->row_pitch : desc->width * new_memory->desc.bytes_per_channel;
 	new_memory->desc.slice_pitch = desc->slice_pitch > 0 ? desc->slice_pitch : new_memory->desc.row_pitch * new_memory->desc.height;
 
-	if_failed(!vv_memory_create_table[desc->type](new_memory, extra), 2, new_memory_cleanup);
+	if(vv_memory_create_table[desc->type])
+		if_failed(!vv_memory_create_table[desc->type](new_memory, extra), 2, new_memory_cleanup);
 
 	*memory = new_memory;
 	goto done;
@@ -96,11 +135,25 @@ int vv_memory_destroy(vv_memory** memory)
 	int result = 0;
 
 	if_failed(memory, 1, done);
-	vv_memory_destroy_table[(*memory)->desc.type](*memory);
+
+	if(vv_memory_destroy_table[(*memory)->desc.type])
+		vv_memory_destroy_table[(*memory)->desc.type](*memory);
+
 	free(*memory);
 	*memory = NULL;
 done:
 	return result;
 }
 
+
+int vv_memory_map(struct vv_memory* memory, void** ptr)
+{
+	return vv_memory_map_table[memory->desc.type] ? vv_memory_map_table[memory->desc.type](memory, ptr) : 1;
+}
+
+
+int vv_memory_unmap(struct vv_memory* memory, void** ptr)
+{
+	return vv_memory_unmap_table[memory->desc.type] ? vv_memory_unmap_table[memory->desc.type](memory, ptr) : 1;
+}
 

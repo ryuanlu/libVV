@@ -38,5 +38,7 @@ typedef struct vv_memory_desc
 int	vv_memory_create	(vv_memory** memory, const vv_memory_desc* desc, void* extra);
 int	vv_memory_destroy	(vv_memory** memory);
 
+int	vv_memory_map	(vv_memory* memory, void** ptr);
+int	vv_memory_unmap	(vv_memory* memory, void** ptr);
 
 #endif /* __VV_H__ */
