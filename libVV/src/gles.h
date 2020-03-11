@@ -2,7 +2,7 @@
 #define __GLES_H__
 
 #include <EGL/egl.h>
-
+#include "memory.h"
 
 struct gles_context
 {
@@ -12,8 +12,10 @@ struct gles_context
 };
 
 
-int	gles_context_create(struct gles_context** context);
-int	gles_context_destroy(struct gles_context** context);
+int	gles_context_create	(struct gles_context** context);
+int	gles_context_destroy	(struct gles_context** context);
 
+int	gles_texture_create	(struct vv_memory* memory, void* extra);
+int	gles_texture_destroy	(struct vv_memory* memory);
 
 #endif /* __GLES_H__ */

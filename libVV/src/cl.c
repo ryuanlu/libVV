@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "context.h"
 #include "cl.h"
 
 #define if_failed(expr, error_code, goto_label) if(!(expr)) { fprintf(stderr, "%s:%d:\t%s() returns %d\n", __FILE__, __LINE__, __FUNCTION__, error_code); result = error_code; goto goto_label; }
@@ -56,6 +57,34 @@ int cl_context_destroy(struct cl_context** context)
 	free(*context);
 	*context = NULL;
 
+done:
+	return result;
+}
+
+
+int cl_buffer_create(struct vv_memory* memory, void* extra)
+{
+	int result = 0;
+	cl_int err = 0;
+
+	if_failed(memory && memory->desc.context, 1, done);
+
+	memory->data = clCreateBuffer(memory->desc.context->cl->context, CL_MEM_READ_WRITE, memory->desc.slice_pitch * memory->desc.bytes_per_channel, NULL, &err);
+
+	if_failed(memory->data, 2, done);
+
+done:
+	return result;
+}
+
+
+int cl_buffer_destroy(struct vv_memory* memory)
+{
+	int result = 0;
+
+	if_failed(memory && memory->desc.context, 1, done);
+
+	clReleaseMemObject(memory->data);
 done:
 	return result;
 }

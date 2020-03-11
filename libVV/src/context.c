@@ -1,16 +1,6 @@
 #include <stdlib.h>
 #include "VV.h"
-#include "gles.h"
-#include "cl.h"
-
-struct vv_context
-{
-	int	capability;
-
-	struct gles_context*	gles;
-	struct cl_context*	cl;
-};
-
+#include "context.h"
 
 int vv_context_create(struct vv_context** context)
 {

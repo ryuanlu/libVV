@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <GLES3/gl32.h>
 #include "gles.h"
 
 #define if_failed(expr, error_code, goto_label) if(!(expr)) { fprintf(stderr, "%s:%d:\t%s() returns %d\n", __FILE__, __LINE__, __FUNCTION__, error_code); result = error_code; goto goto_label; }
@@ -72,3 +73,45 @@ done:
 	return result;
 }
 
+
+int gles_texture_create(struct vv_memory* memory, void* extra)
+{
+	int result = 0;
+
+	glGenTextures(1, (GLuint*)&memory->data);
+	glBindTexture(GL_TEXTURE_3D, (GLuint64)memory->data);
+
+	switch(memory->desc.bytes_per_channel)
+	{
+	case 1:
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, extra);
+		break;
+	case 2:
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_R16UI, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, extra);
+		break;
+	default:
+		if_failed(0, 1, texture_cleanup);
+	}
+
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	goto done;
+
+texture_cleanup:
+	glDeleteTextures(1, (GLuint*)&memory->data);
+done:
+	return result;
+}
+
+
+int gles_texture_destroy(struct vv_memory* memory)
+{
+	int result = 0;
+
+	glBindTexture(GL_TEXTURE_3D, 0);
+	if_failed(memory, 1, done);
+	glDeleteTextures(1, (GLuint*)&memory->data);
+done:
+	return result;
+}
