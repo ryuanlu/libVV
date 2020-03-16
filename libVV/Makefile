@@ -36,3 +36,6 @@ $(TEST_TARGET)_ldflags:=-Wall -Lbuild/ -lVV -g
 $(eval $(call define_c_target,$(TEST_TARGET),src,$(BUILD_DIR)))
 
 $(BUILD_DIR)/$(TEST_TARGET): | $(BUILD_DIR)/$(LINKER_NAME)
+
+run_test: $(TEST_TARGET)
+	@LD_LIBRARY_PATH=$(BUILD_DIR)/ $(BUILD_DIR)/$(TEST_TARGET)

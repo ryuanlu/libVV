@@ -2,7 +2,7 @@ Package: libVV
 Version: 0.1-1
 Architecture: amd64
 Maintainer: 盧瑞元 (Ruei-Yuan Lu) <RueiYuan.Lu@gmail.com>
-Depends: libc6
+Depends: libc6, libegl1-mesa, libgles2-mesa, ocl-icd-libopencl1
 Section: main/libs
 Priority: optional
 Homepage: https://github.com/ryuanlu/libVV

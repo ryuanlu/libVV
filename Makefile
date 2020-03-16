@@ -24,3 +24,5 @@ $(TARGETS): %:
 
 vvcli: libVV
 
+test:
+	+@make -C libVV/ run_test
