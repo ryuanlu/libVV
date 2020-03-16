@@ -2,7 +2,7 @@
 #include "VV.h"
 #include "context.h"
 
-int vv_context_create(struct vv_context** context)
+enum vv_result vv_context_create(struct vv_context** context)
 {
 	struct vv_context* new_context = NULL;
 
@@ -11,16 +11,16 @@ int vv_context_create(struct vv_context** context)
 	cl_context_create(&new_context->cl);
 	*context = new_context;
 
-	return 0;
+	return VV_SUCCESS;
 }
 
 
-int vv_context_destroy(struct vv_context** context)
+enum vv_result vv_context_destroy(struct vv_context** context)
 {
 	cl_context_destroy(&(*context)->cl);
 	gles_context_destroy(&(*context)->gles);
 	free(*context);
 	*context = NULL;
 
-	return 0;
+	return VV_SUCCESS;
 }

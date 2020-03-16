@@ -1,10 +1,23 @@
 #ifndef __VV_H__
 #define __VV_H__
 
+
+typedef enum vv_result
+{
+	VV_SUCCESS,
+	VV_FAILED_TO_INITIALIZE,
+	VV_INVALID_VALUE,
+	VV_INVALID_CONTEXT,
+	VV_OPERATION_NOT_SUPPORTED,
+	VV_BAD_ALLOCATION,
+
+}vv_result;
+
+
 typedef struct vv_context vv_context;
 
-int	vv_context_create	(vv_context** context);
-int	vv_context_destroy	(vv_context** context);
+vv_result	vv_context_create	(vv_context** context);
+vv_result	vv_context_destroy	(vv_context** context);
 
 
 typedef struct vv_memory vv_memory;
@@ -35,10 +48,10 @@ typedef struct vv_memory_desc
 }vv_memory_desc;
 
 
-int	vv_memory_create	(vv_memory** memory, const vv_memory_desc* desc, void* extra);
-int	vv_memory_destroy	(vv_memory** memory);
+vv_result	vv_memory_create	(vv_memory** memory, const vv_memory_desc* desc, void* extra);
+vv_result	vv_memory_destroy	(vv_memory** memory);
 
-int	vv_memory_map	(vv_memory* memory, void** ptr);
-int	vv_memory_unmap	(vv_memory* memory, void** ptr);
+vv_result	vv_memory_map	(vv_memory* memory, void** ptr);
+vv_result	vv_memory_unmap	(vv_memory* memory, void** ptr);
 
 #endif /* __VV_H__ */

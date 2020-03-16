@@ -5,48 +5,47 @@
 #include "memory.h"
 #include "gles.h"
 #include "cl.h"
+#include "debug.h"
 
-#define if_failed(expr, error_code, goto_label) do {if(!(expr)) { fprintf(stderr, "%s:%d:\t%s() returns %d\n", __FILE__, __LINE__, __FUNCTION__, error_code); result = error_code; goto goto_label; }}while(0)
 
-
-static int host_memory_create(struct vv_memory* memory, void* extra)
+static enum vv_result host_memory_create(struct vv_memory* memory, void* extra)
 {
 	memory->data = calloc(1, memory->desc.slice_pitch * memory->desc.depth * memory->desc.bytes_per_channel);
-	return memory->data == NULL;
+	return memory->data ? VV_SUCCESS : VV_BAD_ALLOCATION;
 }
 
 
-static int host_memory_destroy(struct vv_memory* memory)
+static enum vv_result host_memory_destroy(struct vv_memory* memory)
 {
 	free(memory->data);
-	return 0;
+	return VV_SUCCESS;
 }
 
 
-static int host_memory_map(struct vv_memory* memory, void** ptr)
+static enum vv_result host_memory_map(struct vv_memory* memory, void** ptr)
 {
 	*ptr = memory->data;
-	return memory->data == NULL;
+	return memory->data ? VV_SUCCESS : VV_INVALID_VALUE;
 }
 
 
-static int host_memory_unmap(struct vv_memory* memory, void** ptr)
+static enum vv_result host_memory_unmap(struct vv_memory* memory, void** ptr)
 {
 	*ptr = NULL;
-	return 0;
+	return VV_SUCCESS;
 }
 
 
-static int host_pointer_create(struct vv_memory* memory, void* extra)
+static enum vv_result host_pointer_create(struct vv_memory* memory, void* extra)
 {
 	memory->data = extra;
-	return extra == NULL;
+	return extra ? VV_SUCCESS : VV_INVALID_VALUE;
 }
 
 
-static int host_pointer_destroy(struct vv_memory* memory)
+static enum vv_result host_pointer_destroy(struct vv_memory* memory)
 {
-	return 0;
+	return VV_SUCCESS;
 }
 
 
@@ -94,15 +93,15 @@ static PFN_vv_memory_unmap vv_memory_unmap_table[] =
 };
 
 
-int vv_memory_create(struct vv_memory** memory, const struct vv_memory_desc* desc, void* extra)
+enum vv_result vv_memory_create(struct vv_memory** memory, const struct vv_memory_desc* desc, void* extra)
 {
-	int result = 0;
+	enum vv_result result = VV_SUCCESS;
 	struct vv_memory* new_memory = NULL;
 
-	if_failed(memory && desc, 1, done);
-	if_failed(desc->type >= 0 && desc->type < NUMBER_OF_VV_MEMORY_TYPES, 1, done);
-	if_failed(desc->width > 0, 1, done);
-	if_failed((desc->type <= VV_MEMORY_TYPE_HOST_POINTER) || (desc->type >= VV_MEMORY_TYPE_GLES_TEXTURE && desc->context), 1, done);
+	goto_cleanup_if(!memory || !desc, VV_INVALID_VALUE, done);
+	goto_cleanup_if(desc->type < 0 || desc->type >= NUMBER_OF_VV_MEMORY_TYPES, VV_INVALID_VALUE, done);
+	goto_cleanup_if(desc->width <= 0, VV_INVALID_VALUE, done);
+	goto_cleanup_if(desc->type >= VV_MEMORY_TYPE_GLES_TEXTURE && !desc->context, VV_INVALID_CONTEXT, done);
 
 	new_memory = calloc(1, sizeof(struct vv_memory));
 
@@ -118,7 +117,7 @@ int vv_memory_create(struct vv_memory** memory, const struct vv_memory_desc* des
 	new_memory->desc.slice_pitch = desc->slice_pitch > 0 ? desc->slice_pitch : new_memory->desc.row_pitch * new_memory->desc.height;
 
 	if(vv_memory_create_table[desc->type])
-		if_failed(!vv_memory_create_table[desc->type](new_memory, extra), 2, new_memory_cleanup);
+		goto_cleanup_if_failed(vv_memory_create_table[desc->type](new_memory, extra), new_memory_cleanup);
 
 	*memory = new_memory;
 	goto done;
@@ -130,11 +129,11 @@ done:
 }
 
 
-int vv_memory_destroy(vv_memory** memory)
+enum vv_result vv_memory_destroy(vv_memory** memory)
 {
-	int result = 0;
+	enum vv_result result = VV_SUCCESS;
 
-	if_failed(memory, 1, done);
+	goto_cleanup_if(!memory, VV_INVALID_VALUE, done);
 
 	if(vv_memory_destroy_table[(*memory)->desc.type])
 		vv_memory_destroy_table[(*memory)->desc.type](*memory);
@@ -146,14 +145,14 @@ done:
 }
 
 
-int vv_memory_map(struct vv_memory* memory, void** ptr)
+enum vv_result vv_memory_map(struct vv_memory* memory, void** ptr)
 {
-	return vv_memory_map_table[memory->desc.type] ? vv_memory_map_table[memory->desc.type](memory, ptr) : 1;
+	return vv_memory_map_table[memory->desc.type] ? vv_memory_map_table[memory->desc.type](memory, ptr) : VV_OPERATION_NOT_SUPPORTED;
 }
 
 
-int vv_memory_unmap(struct vv_memory* memory, void** ptr)
+enum vv_result vv_memory_unmap(struct vv_memory* memory, void** ptr)
 {
-	return vv_memory_unmap_table[memory->desc.type] ? vv_memory_unmap_table[memory->desc.type](memory, ptr) : 1;
+	return vv_memory_unmap_table[memory->desc.type] ? vv_memory_unmap_table[memory->desc.type](memory, ptr) : VV_OPERATION_NOT_SUPPORTED;
 }
 

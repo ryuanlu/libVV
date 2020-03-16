@@ -12,13 +12,13 @@ struct cl_context
 	cl_command_queue	queue;
 };
 
-int	cl_context_create	(struct cl_context** context);
-int	cl_context_destroy	(struct cl_context** context);
+enum vv_result	cl_context_create	(struct cl_context** context);
+enum vv_result	cl_context_destroy	(struct cl_context** context);
 
-int	cl_buffer_create	(struct vv_memory* memory, void* extra);
-int	cl_buffer_destroy	(struct vv_memory* memory);
+enum vv_result	cl_buffer_create	(struct vv_memory* memory, void* extra);
+enum vv_result	cl_buffer_destroy	(struct vv_memory* memory);
 
-int	cl_buffer_map	(struct vv_memory* memory, void** ptr);
-int	cl_buffer_unmap	(struct vv_memory* memory, void** ptr);
+enum vv_result	cl_buffer_map	(struct vv_memory* memory, void** ptr);
+enum vv_result	cl_buffer_unmap	(struct vv_memory* memory, void** ptr);
 
 #endif /* __CL_H__ */

@@ -12,10 +12,10 @@ struct gles_context
 };
 
 
-int	gles_context_create	(struct gles_context** context);
-int	gles_context_destroy	(struct gles_context** context);
+enum vv_result	gles_context_create	(struct gles_context** context);
+enum vv_result	gles_context_destroy	(struct gles_context** context);
 
-int	gles_texture_create	(struct vv_memory* memory, void* extra);
-int	gles_texture_destroy	(struct vv_memory* memory);
+enum vv_result	gles_texture_create	(struct vv_memory* memory, void* extra);
+enum vv_result	gles_texture_destroy	(struct vv_memory* memory);
 
 #endif /* __GLES_H__ */
