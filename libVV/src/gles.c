@@ -14,10 +14,17 @@ enum vv_result gles_context_create(struct gles_context** context)
 
 	EGLint major_version = 0, minor_version = 0;
 
-	const EGLint attrib_list[] =
+	const EGLint egl_attrib_list[] =
 	{
 		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
 		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
+		EGL_NONE
+	};
+
+	const EGLint gles_attrib_list[] =
+	{
+		EGL_CONTEXT_MAJOR_VERSION, 3,
+		EGL_CONTEXT_MINOR_VERSION, 2,
 		EGL_NONE
 	};
 
@@ -30,9 +37,9 @@ enum vv_result gles_context_create(struct gles_context** context)
 	goto_cleanup_if(!new_context->display, VV_FAILED_TO_INITIALIZE, new_context_cleanup);
 
 	eglInitialize(new_context->display, &major_version, &minor_version);
-	eglChooseConfig(new_context->display, attrib_list, &new_context->config, 1, &num_config);
+	eglChooseConfig(new_context->display, egl_attrib_list, &new_context->config, 1, &num_config);
 	eglBindAPI(EGL_OPENGL_ES_API);
-	new_context->context = eglCreateContext(new_context->display, new_context->config, EGL_NO_CONTEXT, NULL);
+	new_context->context = eglCreateContext(new_context->display, new_context->config, EGL_NO_CONTEXT, gles_attrib_list);
 
 	goto_cleanup_if(!new_context->context, VV_FAILED_TO_INITIALIZE, egldisplay_cleanup);
 
@@ -114,3 +121,82 @@ enum vv_result gles_texture_destroy(struct vv_memory* memory)
 done:
 	return result;
 }
+
+
+static const char* gles_shader_name[] =
+{
+	"GL_VERTEX_SHADER",
+	"GL_FRAGMENT_SHADER",
+	"GL_GEOMETRY_SHADER"
+};
+
+static const GLuint gles_shader_type[] =
+{
+	GL_VERTEX_SHADER,
+	GL_FRAGMENT_SHADER,
+	GL_GEOMETRY_SHADER
+};
+
+
+#define MAX_SHADER_INFO_LENGTH	(4096)
+
+enum vv_result gles_create_shader(const struct gles_context* context, GLuint* shader, const enum gles_shader type, const char* src, const GLint length)
+{
+	char info[MAX_SHADER_INFO_LENGTH] = {0};
+	int info_length = 0;
+	GLuint new_shader = 0;
+	enum vv_result result = VV_SUCCESS;
+
+	goto_cleanup_if(!context || !shader || !src, VV_INVALID_VALUE, done);
+	goto_cleanup_if(type < 0 || type >= NUMBER_OF_GLES_SHADERS, VV_INVALID_VALUE, done);
+
+	new_shader = glCreateShader(gles_shader_type[type]);
+	glShaderSource(new_shader, 1, &src, &length);
+	goto_cleanup_if(glGetError(), VV_FAILED_TO_INITIALIZE, new_shader_cleanup);
+	glCompileShader(new_shader);
+	glGetShaderInfoLog(new_shader, MAX_SHADER_INFO_LENGTH, &info_length, info);
+
+	if(info_length)
+		fprintf(stderr, "%s information:\n\n%s\n", gles_shader_name[type], info);
+
+	goto_cleanup_if(info_length, VV_FAILED_TO_INITIALIZE, new_shader_cleanup);
+
+	*shader = new_shader;
+	goto done;
+
+new_shader_cleanup:
+	glDeleteShader(new_shader);
+done:
+	return result;
+}
+
+
+enum vv_result gles_create_program(const struct gles_context* context, GLuint* program, const GLuint vertex_shader, const GLuint fragment_shader)
+{
+	char info[MAX_SHADER_INFO_LENGTH] = {0};
+	int info_length = 0;
+
+	GLuint new_program = 0;
+	enum vv_result result = VV_SUCCESS;
+
+	new_program = glCreateProgram();
+	glAttachShader(new_program, vertex_shader);
+	glAttachShader(new_program, fragment_shader);
+	glLinkProgram(new_program);
+
+	glGetProgramInfoLog(new_program, MAX_SHADER_INFO_LENGTH, &info_length, info);
+
+	if(info_length)
+		fprintf(stderr, "GL program information:\n\n%s\n", info);
+
+	goto_cleanup_if(info_length, VV_FAILED_TO_INITIALIZE, new_program_cleanup);
+
+	*program = new_program;
+	goto done;
+
+new_program_cleanup:
+	glDeleteProgram(new_program);
+done:
+	return result;
+}
+
