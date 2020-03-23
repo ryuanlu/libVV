@@ -14,11 +14,15 @@ typedef enum vv_result
 }vv_result;
 
 
+/* vv_context */
+
 typedef struct vv_context vv_context;
 
 vv_result	vv_context_create	(vv_context** context);
 vv_result	vv_context_destroy	(vv_context** context);
 
+
+/* vv_memory */
 
 typedef struct vv_memory vv_memory;
 typedef enum vv_memory_type
@@ -47,11 +51,31 @@ typedef struct vv_memory_desc
 
 }vv_memory_desc;
 
-
 vv_result	vv_memory_create	(vv_memory** memory, const vv_memory_desc* desc, void* extra);
 vv_result	vv_memory_destroy	(vv_memory** memory);
 
 vv_result	vv_memory_map	(vv_memory* memory, void** ptr);
 vv_result	vv_memory_unmap	(vv_memory* memory, void** ptr);
+
+
+/* vv_visualizer */
+
+typedef struct vv_visualizer vv_visualizer;
+typedef enum vv_visualizer_type
+{
+	VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED,
+	VV_VISUALIZER_TYPE_3D_TEXTURE_VIEW_ALIGNED,
+	NUMBER_OF_VV_VISUALIZER_TYPES,
+}vv_visualizer_type;
+
+vv_result	vv_visualizer_create	(vv_context* context, vv_visualizer** visualizer, const vv_visualizer_type type);
+vv_result	vv_visualizer_destroy	(vv_visualizer** visualizer);
+
+vv_result	vv_visualizer_set_volume	(vv_visualizer* visualizer, vv_memory* volume);
+vv_result	vv_visualizer_set_colormap	(vv_visualizer* visualizer, vv_memory* colormap);
+
+vv_result	vv_visualizer_render	(vv_visualizer* visualizer);
+
+
 
 #endif /* __VV_H__ */
