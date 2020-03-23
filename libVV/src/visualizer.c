@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "visualizer.h"
+#include "gles_visualizer.h"
 #include "debug.h"
 
 
@@ -8,31 +9,36 @@
 
 static PFN_vv_visualizer_create vv_visualizer_create_table[] = 
 {
-
+	gles_visualizer_create,
+	gles_visualizer_create,
 };
 
 
 static PFN_vv_visualizer_destroy vv_visualizer_destroy_table[] =
 {
-
+	gles_visualizer_destroy,
+	gles_visualizer_destroy,
 };
 
 
 static PFN_vv_visualizer_set_volume vv_visualizer_set_volume_table[] =
 {
-
+	gles_visualizer_set_volume,
+	gles_visualizer_set_volume,
 };
 
 
 static PFN_vv_visualizer_set_colormap vv_visualizer_set_colormap_table[] =
 {
-
+	gles_visualizer_set_colormap,
+	gles_visualizer_set_colormap,
 };
 
 
 static PFN_vv_visualizer_render vv_visualizer_render_table[] =
 {
-
+	gles_visualizer_render,
+	gles_visualizer_render,
 };
 
 
@@ -50,7 +56,7 @@ enum vv_result vv_visualizer_create(struct vv_context* context, struct vv_visual
 	new_visualizer->context = context;
 
 	if(vv_visualizer_create_table[new_visualizer->type])
-		goto_cleanup_if_failed(vv_visualizer_create_table[type](context, visualizer), new_visualizer_cleanup);
+		goto_cleanup_if_failed(vv_visualizer_create_table[type](new_visualizer), new_visualizer_cleanup);
 
 	*visualizer = new_visualizer;
 	goto done;
@@ -68,7 +74,7 @@ enum vv_result vv_visualizer_destroy(struct vv_visualizer** visualizer)
 	goto_cleanup_if(!visualizer, VV_INVALID_VALUE, done);
 
 	if(vv_visualizer_destroy_table[(*visualizer)->type])
-		goto_cleanup_if_failed(vv_visualizer_destroy_table[(*visualizer)->type](visualizer), done);
+		goto_cleanup_if_failed(vv_visualizer_destroy_table[(*visualizer)->type](*visualizer), done);
 
 	*visualizer = NULL;
 done:

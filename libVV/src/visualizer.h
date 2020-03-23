@@ -20,8 +20,8 @@ struct vv_visualizer
 
 
 
-typedef enum vv_result (*PFN_vv_visualizer_create)(struct vv_context* context, struct vv_visualizer** visualizer);
-typedef enum vv_result (*PFN_vv_visualizer_destroy)(struct vv_visualizer** visualizer);
+typedef enum vv_result (*PFN_vv_visualizer_create)(struct vv_visualizer* visualizer);
+typedef enum vv_result (*PFN_vv_visualizer_destroy)(struct vv_visualizer* visualizer);
 
 typedef enum vv_result (*PFN_vv_visualizer_set_volume)(struct vv_visualizer* visualizer, struct vv_memory* volume);
 typedef enum vv_result (*PFN_vv_visualizer_set_colormap)(struct vv_visualizer* visualizer, struct vv_memory* colormap);
