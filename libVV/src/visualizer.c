@@ -1,10 +1,8 @@
 #include <stdlib.h>
 #include "visualizer.h"
 #include "gles_visualizer.h"
+#include "matrix.h"
 #include "debug.h"
-
-
-
 
 
 static PFN_vv_visualizer_create vv_visualizer_create_table[] = 
@@ -54,6 +52,9 @@ enum vv_result vv_visualizer_create(struct vv_context* context, struct vv_visual
 
 	new_visualizer->type = type;
 	new_visualizer->context = context;
+
+	mat4_load_idendity(new_visualizer->modelview);
+	mat4_load_idendity(new_visualizer->projection);
 
 	if(vv_visualizer_create_table[new_visualizer->type])
 		goto_cleanup_if_failed(vv_visualizer_create_table[type](new_visualizer), new_visualizer_cleanup);
