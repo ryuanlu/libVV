@@ -61,6 +61,12 @@ int main(int argc, char** argv)
 	fprintf(stderr, "ptr = %p\n", ptr);
 	vv_memory_destroy(&memory);
 
+	{
+		vv_visualizer* visualizer = NULL;
+		vv_visualizer_create(context, &visualizer, VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED);
+		vv_visualizer_destroy(&visualizer);
+	}
+
 	vv_context_destroy(&context);
 	return EXIT_SUCCESS;
 }

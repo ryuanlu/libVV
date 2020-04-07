@@ -6,6 +6,12 @@
 #include "visualizer.h"
 #include "debug.h"
 
+
+extern const char _binary_src_axis_aligned_vert_start;
+extern const char _binary_src_axis_aligned_vert_end;
+extern const char _binary_src_axis_aligned_frag_start;
+extern const char _binary_src_axis_aligned_frag_end;
+
 struct gles_visualizer
 {
 	struct gles_context*	context;
@@ -23,8 +29,10 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 {
 	enum vv_result result = VV_SUCCESS;
 	struct gles_visualizer* new_visualizer = NULL;
-	char* vert_src = NULL;
-	char* frag_src = NULL;
+	const char* vert_src = NULL;
+	const char* frag_src = NULL;
+	const int sizeof_vert_src = &_binary_src_axis_aligned_vert_end - &_binary_src_axis_aligned_vert_start;
+	const int sizeof_frag_src = &_binary_src_axis_aligned_frag_end - &_binary_src_axis_aligned_frag_start;
 
 	new_visualizer = calloc(1, sizeof(struct gles_visualizer));
 	new_visualizer->context = visualizer->context->gles;
@@ -32,8 +40,8 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	switch(visualizer->type)
 	{
 	case VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED:
-		vert_src = NULL;
-		frag_src = NULL;
+		vert_src = &_binary_src_axis_aligned_vert_start;
+		frag_src = &_binary_src_axis_aligned_frag_start;
 		break;
 	case VV_VISUALIZER_TYPE_3D_TEXTURE_VIEW_ALIGNED:
 		vert_src = NULL;
@@ -43,8 +51,8 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 		break;
 	}
 
-	goto_cleanup_if_failed(gles_create_shader(new_visualizer->context, &new_visualizer->vertex_shader, VV_VERTEX_SHADER, vert_src, -1), new_visualizer_cleanup);
-	goto_cleanup_if_failed(gles_create_shader(new_visualizer->context, &new_visualizer->fragment_shader, VV_FRAGMENT_SHADER, frag_src, -1), vertex_shader_cleanup);
+	goto_cleanup_if_failed(gles_create_shader(new_visualizer->context, &new_visualizer->vertex_shader, VV_VERTEX_SHADER, vert_src, sizeof_vert_src), new_visualizer_cleanup);
+	goto_cleanup_if_failed(gles_create_shader(new_visualizer->context, &new_visualizer->fragment_shader, VV_FRAGMENT_SHADER, frag_src, sizeof_frag_src), vertex_shader_cleanup);
 	goto_cleanup_if_failed(gles_create_program(new_visualizer->context, &new_visualizer->shader_program, new_visualizer->vertex_shader, new_visualizer->fragment_shader), fragment_shader_cleanup);
 
 	visualizer->derivative = new_visualizer;
@@ -124,7 +132,6 @@ done:
 enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 {
 	enum vv_result result = VV_SUCCESS;
-done:
 	return result;
 }
 

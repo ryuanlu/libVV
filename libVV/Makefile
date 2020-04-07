@@ -20,6 +20,7 @@ build:
 	mkdir -p $@
 
 $(TARGET)_src_files:=context.c gles.c cl.c memory.c visualizer.c gles_visualizer.c matrix.c debug.c
+$(TARGET)_extra_files:=axis_aligned.vert axis_aligned.frag
 $(TARGET)_cflags:=-fPIC -Wall -Iinclude/libVV -g
 $(TARGET)_ldflags:=-shared -Wall -Wl,-soname,$(TARGET) -lEGL -lGLESv2 -lOpenCL -g
 

@@ -1,14 +1,19 @@
 define define_c_target
 $(1)_obj_files:=$$(foreach obj,$$($(1)_src_files:.c=.o),$(3)/$$(obj))
+$(1)_extra_obj_files:=$$(foreach obj,$$($(1)_extra_files:%=%.o),$(3)/$$(obj))
 $(1)_dep_files:=$$($(1)_obj_files:.o=.o.d)
 
 $$($(1)_obj_files): $(3)/%.o: $(2)/%.c | $(3)
 	@echo "\tCC\t$$@"
 	$$(CC) -MMD -MF $$@.d -c $$< -o $$@ $$($(1)_cflags)
 
+$$($(1)_extra_obj_files): $(3)/%.o: $(2)/% | $(3)
+	@echo "\tLD\t$$@"
+	$$(LD) -r -b binary $$< -o $$@
+
 $(1): $(3)/$(1)
 
-$(3)/$(1): $$($(1)_obj_files)
+$(3)/$(1): $$($(1)_obj_files) $$($(1)_extra_obj_files)
 	@echo "\tLD\t$$@"
 	$$(CC) $$^ -o $$@ $$($(1)_ldflags)
 
