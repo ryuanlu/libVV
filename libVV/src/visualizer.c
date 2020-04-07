@@ -19,6 +19,13 @@ static PFN_vv_visualizer_destroy vv_visualizer_destroy_table[] =
 };
 
 
+static PFN_vv_visualizer_set_viewport vv_visualizer_set_viewport_table[] =
+{
+	gles_visualizer_set_viewport,
+	gles_visualizer_set_viewport,
+};
+
+
 static PFN_vv_visualizer_set_volume vv_visualizer_set_volume_table[] =
 {
 	gles_visualizer_set_volume,
@@ -83,6 +90,18 @@ done:
 }
 
 
+enum vv_result vv_visualizer_set_viewport(struct vv_visualizer* visualizer, const int width, const int height)
+{
+	enum vv_result result = VV_SUCCESS;
+
+	if(vv_visualizer_set_viewport_table[visualizer->type])
+		goto_cleanup_if_failed(vv_visualizer_set_viewport_table[visualizer->type](visualizer, width, height), done);
+
+done:
+	return result;
+}
+
+
 enum vv_result vv_visualizer_set_volume(struct vv_visualizer* visualizer, struct vv_memory* volume)
 {
 	enum vv_result result = VV_SUCCESS;
@@ -91,7 +110,6 @@ enum vv_result vv_visualizer_set_volume(struct vv_visualizer* visualizer, struct
 
 	if(vv_visualizer_set_volume_table[visualizer->type])
 		goto_cleanup_if_failed(vv_visualizer_set_volume_table[visualizer->type](visualizer, volume), done);
-
 
 done:
 	return result;

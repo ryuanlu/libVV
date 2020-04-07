@@ -22,6 +22,7 @@ struct gles_visualizer
 	GLuint	fragment_shader;
 	GLuint	shader_program;
 
+	GLuint	fbo;
 };
 
 
@@ -55,6 +56,8 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	goto_cleanup_if_failed(gles_create_shader(new_visualizer->context, &new_visualizer->fragment_shader, VV_FRAGMENT_SHADER, frag_src, sizeof_frag_src), vertex_shader_cleanup);
 	goto_cleanup_if_failed(gles_create_program(new_visualizer->context, &new_visualizer->shader_program, new_visualizer->vertex_shader, new_visualizer->fragment_shader), fragment_shader_cleanup);
 
+	glGenFramebuffers(1, &new_visualizer->fbo);
+
 	visualizer->derivative = new_visualizer;
 	goto done;
 
@@ -83,6 +86,39 @@ enum vv_result gles_visualizer_destroy(struct vv_visualizer* visualizer)
 
 	if(gles_visualizer->colormap)
 		vv_memory_destroy(&gles_visualizer->colormap);
+
+	return result;
+}
+
+
+enum vv_result gles_visualizer_set_viewport(struct vv_visualizer* visualizer, const int width, const int height)
+{
+	enum vv_result result = VV_SUCCESS;
+	struct gles_visualizer* gles_visualizer = visualizer->derivative;
+
+	if(visualizer->framebuffer)
+		vv_memory_destroy(&visualizer->framebuffer);
+
+	result = vv_memory_create
+	(
+		&visualizer->framebuffer,
+		&(const vv_memory_desc)
+		{
+			.type = VV_MEMORY_TYPE_GLES_TEXTURE,
+			.context = visualizer->context,
+			.width = width,
+			.height = height,
+			.bytes_per_channel = 4,
+		},
+		NULL
+	);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GLuint64)(visualizer->framebuffer->data), 0);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
 	return result;
 }
@@ -132,6 +168,18 @@ done:
 enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 {
 	enum vv_result result = VV_SUCCESS;
+	struct gles_visualizer* gles_visualizer = visualizer->derivative;
+
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
+	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+	/* Update uniforms */
+	/* Call glDrawArrays */
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
 	return result;
 }
 

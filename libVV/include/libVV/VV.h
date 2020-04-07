@@ -71,6 +71,7 @@ typedef enum vv_visualizer_type
 vv_result	vv_visualizer_create	(vv_context* context, vv_visualizer** visualizer, const vv_visualizer_type type);
 vv_result	vv_visualizer_destroy	(vv_visualizer** visualizer);
 
+vv_result	vv_visualizer_set_viewport	(vv_visualizer* visualizer, const int width, const int height);
 vv_result	vv_visualizer_set_volume	(vv_visualizer* visualizer, vv_memory* volume);
 vv_result	vv_visualizer_set_colormap	(vv_visualizer* visualizer, vv_memory* colormap);
 

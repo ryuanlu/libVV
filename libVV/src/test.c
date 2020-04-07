@@ -64,6 +64,7 @@ int main(int argc, char** argv)
 	{
 		vv_visualizer* visualizer = NULL;
 		vv_visualizer_create(context, &visualizer, VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED);
+		vv_visualizer_set_viewport(visualizer, 800, 800);
 		vv_visualizer_destroy(&visualizer);
 	}
 
