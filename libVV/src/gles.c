@@ -43,6 +43,9 @@ enum vv_result gles_context_create(struct gles_context** context)
 
 	goto_cleanup_if(!new_context->context, VV_FAILED_TO_INITIALIZE, egldisplay_cleanup);
 
+#ifdef CONFIG_GLES20_COMPATIBLE
+	new_context->glFramebufferTexture = (PFNGLFRAMEBUFFERTEXTUREPROC)eglGetProcAddress("glFramebufferTexture");
+#endif
 	eglMakeCurrent(new_context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, new_context->context);
 
 	goto_cleanup_if(eglGetError() != EGL_SUCCESS, VV_INVALID_CONTEXT, eglcontext_cleanup);

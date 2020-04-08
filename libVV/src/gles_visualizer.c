@@ -115,10 +115,13 @@ enum vv_result gles_visualizer_set_viewport(struct vv_visualizer* visualizer, co
 
 
 	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
+#ifdef CONFIG_GLES20_COMPATIBLE
+	gles_visualizer->context->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GLuint64)(visualizer->framebuffer->data), 0);
+#else
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GLuint64)(visualizer->framebuffer->data), 0);
+#endif
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 
 	return result;
 }

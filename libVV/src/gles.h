@@ -10,6 +10,9 @@ struct gles_context
 	EGLDisplay	display;
 	EGLContext	context;
 	EGLConfig	config;
+#ifdef CONFIG_GLES20_COMPATIBLE
+	PFNGLFRAMEBUFFERTEXTUREPROC	glFramebufferTexture;
+#endif
 };
 
 
