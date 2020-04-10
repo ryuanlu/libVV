@@ -18,7 +18,7 @@ enum vv_result	cl_context_destroy	(struct cl_context** context);
 enum vv_result	cl_buffer_create	(struct vv_memory* memory, void* extra);
 enum vv_result	cl_buffer_destroy	(struct vv_memory* memory);
 
-enum vv_result	cl_buffer_map	(struct vv_memory* memory, void** ptr);
-enum vv_result	cl_buffer_unmap	(struct vv_memory* memory, void** ptr);
+enum vv_result	cl_buffer_map	(const struct vv_memory* memory, void** ptr);
+enum vv_result	cl_buffer_unmap	(const struct vv_memory* memory, void** ptr);
 
 #endif /* __CL_H__ */

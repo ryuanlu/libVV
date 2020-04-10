@@ -22,14 +22,14 @@ static enum vv_result host_memory_destroy(struct vv_memory* memory)
 }
 
 
-static enum vv_result host_memory_map(struct vv_memory* memory, void** ptr)
+static enum vv_result host_memory_map(const struct vv_memory* memory, void** ptr)
 {
 	*ptr = memory->data;
 	return memory->data ? VV_SUCCESS : VV_INVALID_VALUE;
 }
 
 
-static enum vv_result host_memory_unmap(struct vv_memory* memory, void** ptr)
+static enum vv_result host_memory_unmap(const struct vv_memory* memory, void** ptr)
 {
 	*ptr = NULL;
 	return VV_SUCCESS;
@@ -46,6 +46,46 @@ static enum vv_result host_pointer_create(struct vv_memory* memory, void* extra)
 static enum vv_result host_pointer_destroy(struct vv_memory* memory)
 {
 	return VV_SUCCESS;
+}
+
+
+static enum vv_result mapable_duplicate(struct vv_memory** memory, const struct vv_memory_desc* desc, const struct vv_memory* source)
+{
+	enum vv_result result = VV_SUCCESS;
+	struct vv_memory* new_memory = NULL;
+	char* src_data = NULL;
+	char* dest_data = NULL;
+	const struct vv_memory_desc* src_desc = &source->desc;
+	int d, h;
+
+	goto_cleanup_if_failed(vv_memory_create(&new_memory, desc, NULL), done);
+
+	goto_cleanup_if_failed(vv_memory_map(source, (void**)&src_data), new_memory_cleanup);
+	goto_cleanup_if_failed(vv_memory_map(new_memory, (void**)&dest_data), new_memory_cleanup);
+
+	for(d = 0;d < desc->depth;++d)
+	{
+		for(h = 0;h < desc->height;++h)
+		{
+			memcpy
+			(
+				&dest_data[d * desc->slice_pitch + h * desc->row_pitch],
+				&src_data[d * src_desc->slice_pitch + h * src_desc->row_pitch],
+				desc->width * desc->bytes_per_channel
+			);
+		}
+	}
+
+	vv_memory_unmap(source, (void**)&src_data);
+	vv_memory_unmap(new_memory, (void**)&dest_data);
+
+	*memory = new_memory;
+	goto done;
+
+new_memory_cleanup:
+	vv_memory_destroy(&new_memory);
+done:
+	return result;
 }
 
 
@@ -89,6 +129,52 @@ static PFN_vv_memory_unmap vv_memory_unmap_table[] =
 	NULL,
 	NULL,
 	cl_buffer_unmap,
+	NULL,
+};
+
+
+static PFN_vv_memory_duplicate vv_memory_duplicate_table[] =
+{
+	mapable_duplicate,
+	mapable_duplicate,
+	NULL,
+	NULL,
+	mapable_duplicate,
+	NULL,
+
+	mapable_duplicate,
+	mapable_duplicate,
+	NULL,
+	NULL,
+	mapable_duplicate,
+	NULL,
+
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+
+	mapable_duplicate,
+	mapable_duplicate,
+	NULL,
+	NULL,
+	mapable_duplicate,
+	NULL,
+
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	NULL,
 };
 
@@ -145,14 +231,19 @@ done:
 }
 
 
-enum vv_result vv_memory_map(struct vv_memory* memory, void** ptr)
+enum vv_result vv_memory_map(const struct vv_memory* memory, void** ptr)
 {
 	return vv_memory_map_table[memory->desc.type] ? vv_memory_map_table[memory->desc.type](memory, ptr) : VV_OPERATION_NOT_SUPPORTED;
 }
 
 
-enum vv_result vv_memory_unmap(struct vv_memory* memory, void** ptr)
+enum vv_result vv_memory_unmap(const struct vv_memory* memory, void** ptr)
 {
 	return vv_memory_unmap_table[memory->desc.type] ? vv_memory_unmap_table[memory->desc.type](memory, ptr) : VV_OPERATION_NOT_SUPPORTED;
 }
 
+
+enum vv_result vv_memory_duplicate(struct vv_memory** memory, const struct vv_memory_desc* desc, const struct vv_memory* source)
+{
+	return vv_memory_duplicate_table[NUMBER_OF_VV_MEMORY_TYPES * source->desc.type + desc->type] ? vv_memory_duplicate_table[NUMBER_OF_VV_MEMORY_TYPES * desc->type + source->desc.type](memory, desc, source) : VV_OPERATION_NOT_SUPPORTED;
+}

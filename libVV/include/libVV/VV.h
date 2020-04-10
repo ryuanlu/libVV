@@ -54,9 +54,10 @@ typedef struct vv_memory_desc
 vv_result	vv_memory_create	(vv_memory** memory, const vv_memory_desc* desc, void* extra);
 vv_result	vv_memory_destroy	(vv_memory** memory);
 
-vv_result	vv_memory_map	(vv_memory* memory, void** ptr);
-vv_result	vv_memory_unmap	(vv_memory* memory, void** ptr);
+vv_result	vv_memory_map	(const vv_memory* memory, void** ptr);
+vv_result	vv_memory_unmap	(const vv_memory* memory, void** ptr);
 
+vv_result	vv_memory_duplicate	(vv_memory** memory, const vv_memory_desc* desc, const vv_memory* source);
 
 /* vv_visualizer */
 
