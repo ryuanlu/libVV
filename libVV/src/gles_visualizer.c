@@ -23,6 +23,7 @@ struct gles_visualizer
 	GLuint	shader_program;
 
 	GLuint	fbo;
+	GLuint	vao;
 };
 
 
@@ -57,6 +58,7 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	goto_cleanup_if_failed(gles_create_program(new_visualizer->context, &new_visualizer->shader_program, new_visualizer->vertex_shader, new_visualizer->fragment_shader), fragment_shader_cleanup);
 
 	glGenFramebuffers(1, &new_visualizer->fbo);
+	glGenVertexArrays(1, &new_visualizer->vao);
 
 	visualizer->derivative = new_visualizer;
 	goto done;
@@ -175,6 +177,12 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 
 	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
 	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
+	glBindVertexArray(gles_visualizer->vao);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_3D, gles_visualizer->texture->data);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_3D, gles_visualizer->colormap->data);
+
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	/* Update uniforms */
