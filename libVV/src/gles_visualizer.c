@@ -179,9 +179,9 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
 	glBindVertexArray(gles_visualizer->vao);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D, gles_visualizer->texture->data);
+	glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->texture->data);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_3D, gles_visualizer->colormap->data);
+	glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->colormap->data);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
