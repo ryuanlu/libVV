@@ -11,9 +11,8 @@ TEST_TARGET:=test
 
 all: $(BUILD_DIR)/$(LINKER_NAME) $(BUILD_DIR)/$(TEST_TARGET)
 
-clean: $(TARGET)_clean
-	@echo "\tCLEAN\t$(BUILD_DIR)"
-	rm -rf $(BUILD_DIR)
+clean: $(TARGET)_clean $(TEST_TARGET)_clean
+	@rm -f $(BUILD_DIR)/$(LINKER_NAME)
 
 build:
 	@echo "\tMKDIR\t$@"

@@ -19,7 +19,7 @@ $(3)/$(1): $$($(1)_obj_files) $$($(1)_extra_obj_files)
 
 $(1)_clean:
 	@echo "\tCLEAN\t$(1)"
-	rm -f $$($(1)_obj_files) $(3)/$(1) $(3)/$(1).d
+	rm -f $$($(1)_obj_files) $$($(1)_extra_obj_files) $$($(1)_dep_files) $(3)/$(1)
 
 sinclude $$($(1)_dep_files)
 
