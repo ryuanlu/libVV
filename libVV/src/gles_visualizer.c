@@ -22,6 +22,10 @@ struct gles_visualizer
 	GLuint	fragment_shader;
 	GLuint	shader_program;
 
+	GLuint	world_loc;
+	GLuint	view_loc;
+	GLuint	projection_loc;
+
 	GLuint	fbo;
 	GLuint	vao;
 };
@@ -59,6 +63,10 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 
 	glGenFramebuffers(1, &new_visualizer->fbo);
 	glGenVertexArrays(1, &new_visualizer->vao);
+
+	new_visualizer->world_loc	= glGetUniformLocation(new_visualizer->shader_program, "world");
+	new_visualizer->view_loc	= glGetUniformLocation(new_visualizer->shader_program, "view");
+	new_visualizer->projection_loc	= glGetUniformLocation(new_visualizer->shader_program, "projection");
 
 	visualizer->derivative = new_visualizer;
 	goto done;
@@ -185,7 +193,14 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+
 	/* Update uniforms */
+
+	glUniformMatrix4fv(gles_visualizer->world_loc, 1, GL_FALSE, visualizer->world);
+	glUniformMatrix4fv(gles_visualizer->view_loc, 1, GL_FALSE, visualizer->view);
+	glUniformMatrix4fv(gles_visualizer->projection_loc, 1, GL_FALSE, visualizer->projection);
+
+
 	/* Call glDrawArrays */
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

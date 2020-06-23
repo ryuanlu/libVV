@@ -12,7 +12,8 @@ struct vv_visualizer
 	struct vv_memory*	volume;
 	struct vv_memory*	colormap;
 
-	float	modelview[16];
+	float	world[16];
+	float	view[16];
 	float	projection[16];
 
 	void*	derivative;

@@ -60,7 +60,8 @@ enum vv_result vv_visualizer_create(struct vv_context* context, struct vv_visual
 	new_visualizer->type = type;
 	new_visualizer->context = context;
 
-	mat4_load_idendity(new_visualizer->modelview);
+	mat4_load_idendity(new_visualizer->world);
+	mat4_load_idendity(new_visualizer->view);
 	mat4_load_idendity(new_visualizer->projection);
 
 	if(vv_visualizer_create_table[new_visualizer->type])
