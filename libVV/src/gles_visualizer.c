@@ -4,6 +4,7 @@
 #include "context.h"
 #include "memory.h"
 #include "visualizer.h"
+#include "matrix.h"
 #include "debug.h"
 
 
@@ -178,8 +179,77 @@ done:
 }
 
 
+static int get_slicing_direction(struct vv_visualizer* visualizer)
+{
+	float modelview[16];
+	float vec[4];
+	float depth[6];
+	int direction, i, min;
+
+	mat4_load_idendity(modelview);
+	mat4_mul(modelview, modelview, visualizer->world);
+	mat4_mul(modelview, modelview, visualizer->view);
+
+
+	/* -Z */
+
+	vec4_set(vec, 0.0, 0.0, -0.5, 1.0);
+	mat4_mul_vec4(vec, modelview, vec);
+	depth[0] = vec[2] / vec[3];
+
+
+	/* +Z */
+
+	vec4_set(vec, 0.0, 0.0, 0.5, 1.0);
+	mat4_mul_vec4(vec, modelview, vec);
+	depth[1] = vec[2] / vec[3];
+
+
+	/* -Y */
+
+	vec4_set(vec, 0.0, -0.5, 0.0, 1.0);
+	mat4_mul_vec4(vec, modelview, vec);
+	depth[2] = vec[2] / vec[3];
+
+
+	/* +Y */
+
+	vec4_set(vec, 0.0, 0.5, 0.0, 1.0);
+	mat4_mul_vec4(vec, modelview, vec);
+	depth[3] = vec[2] / vec[3];
+
+
+	/* -X */
+
+	vec4_set(vec, -0.5, 0.0, 0.0, 1.0);
+	mat4_mul_vec4(vec, modelview, vec);
+	depth[4] = vec[2] / vec[3];
+
+
+	/* +X */
+
+	vec4_set(vec, 0.5, 0.0, 0.0, 1.0);
+	mat4_mul_vec4(vec, modelview, vec);
+	depth[5] = vec[2] / vec[3];
+
+	min = depth[0];
+	direction = 0;
+
+	for(i = 0;i < 6;++i)
+	{
+		if(depth[i] < min)
+		{
+			min = depth[i];
+			direction = i;
+		}
+	}
+
+	return direction;
+}
+
 enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 {
+	int direction = 0;
 	enum vv_result result = VV_SUCCESS;
 	struct gles_visualizer* gles_visualizer = visualizer->derivative;
 
@@ -200,6 +270,7 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 	glUniformMatrix4fv(gles_visualizer->view_loc, 1, GL_FALSE, visualizer->view);
 	glUniformMatrix4fv(gles_visualizer->projection_loc, 1, GL_FALSE, visualizer->projection);
 
+	direction = get_slicing_direction(visualizer);
 
 	/* Call glDrawArrays */
 

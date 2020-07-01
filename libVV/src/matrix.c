@@ -39,7 +39,7 @@ void mat4_set_frustum(float* matrix, float left, float right, float bottom, floa
 }
 
 
-void mat4_set_perspective(float *matrix, float fovy, float aspect, float near, float far)
+void mat4_set_perspective(float* matrix, float fovy, float aspect, float near, float far)
 {
 	float ymax, xmax;
 	ymax = near * tanf(fovy * 3.14159265358979323846 / 360.0);
@@ -48,10 +48,11 @@ void mat4_set_perspective(float *matrix, float fovy, float aspect, float near, f
 }
 
 
-void mat4_mul(float *A, float *B)
+void mat4_mul(float* out, float* A, float* B)
 {
 	int row, col, i;
 	float C[16];
+
 	for(row = 0;row < 4;++row)
 	{
 		for(col = 0;col < 4;++col)
@@ -62,6 +63,36 @@ void mat4_mul(float *A, float *B)
 		}
 	}
 
+	out = out ? out : A;
+
 	for(i = 0;i < 16;++i)
-		A[i] = C[i];
+		out[i] = C[i];
+}
+
+
+void mat4_mul_vec4(float* out, float* A, float* B)
+{
+	int row, i;
+	float C[4];
+
+	for(row = 0;row < 4;++row)
+	{
+		C[row] = 0.0;
+		for(i = 0;i < 4;++i)
+			C[row] += A[i * 4 + row] * B[i];
+	}
+
+	out = out ? out : B;
+
+	for(i = 0;i < 4;++i)
+		out[i] = C[i];
+}
+
+
+void vec4_set(float* vector, float x, float y, float z, float w)
+{
+	vector[0] = x;
+	vector[1] = y;
+	vector[2] = z;
+	vector[3] = w;
 }
