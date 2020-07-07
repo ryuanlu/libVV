@@ -23,6 +23,8 @@ struct gles_visualizer
 	GLuint	fragment_shader;
 	GLuint	shader_program;
 
+	GLuint	nr_slices_loc;
+	GLuint	local_loc;
 	GLuint	world_loc;
 	GLuint	view_loc;
 	GLuint	projection_loc;
@@ -65,6 +67,8 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	glGenFramebuffers(1, &new_visualizer->fbo);
 	glGenVertexArrays(1, &new_visualizer->vao);
 
+	new_visualizer->nr_slices_loc	= glGetUniformLocation(new_visualizer->shader_program, "nr_slices");
+	new_visualizer->local_loc	= glGetUniformLocation(new_visualizer->shader_program, "local");
 	new_visualizer->world_loc	= glGetUniformLocation(new_visualizer->shader_program, "world");
 	new_visualizer->view_loc	= glGetUniformLocation(new_visualizer->shader_program, "view");
 	new_visualizer->projection_loc	= glGetUniformLocation(new_visualizer->shader_program, "projection");
@@ -250,6 +254,8 @@ static int get_slicing_direction(struct vv_visualizer* visualizer)
 enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 {
 	int direction = 0;
+	int nr_slices = 0;
+	float local[16] = {0.0};
 	enum vv_result result = VV_SUCCESS;
 	struct gles_visualizer* gles_visualizer = visualizer->derivative;
 
@@ -272,7 +278,52 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 
 	direction = get_slicing_direction(visualizer);
 
+	local[15] = 1.0;
+
+	switch(direction)
+	{
+	case 0:
+		local[0] = 1.0;
+		local[5] = 1.0;
+		local[10] = 1.0;
+		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.depth);
+		break;
+	case 1:
+		local[0] = 1.0;
+		local[5] = 1.0;
+		local[10] = -1.0;
+		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.depth);
+		break;
+	case 2:
+		local[8] = 1.0;
+		local[1] = 1.0;
+		local[6] = 1.0;
+		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.height);
+		break;
+	case 3:
+		local[8] = 1.0;
+		local[1] = 1.0;
+		local[6] = -1.0;
+		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.height);
+		break;
+	case 4:
+		local[4] = 1.0;
+		local[9] = 1.0;
+		local[2] = 1.0;
+		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.width);
+		break;
+	case 5:
+		local[4] = 1.0;
+		local[9] = 1.0;
+		local[2] = -1.0;
+		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.width);
+		break;
+	}
+
+	glUniformMatrix4fv(gles_visualizer->local_loc, 1, GL_FALSE, local);
+
 	/* Call glDrawArrays */
+	glDrawArrays(GL_TRIANGLES, 0, 6 * nr_slices);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
