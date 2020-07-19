@@ -2,72 +2,51 @@
 #include <stdlib.h>
 #include "VV.h"
 
+#define TEST_DATA_PATH	"../cthead.bin"
+#define TEST_DATA_WIDTH		(256)
+#define TEST_DATA_HEIGHT	(256)
+#define TEST_DATA_DEPTH		(113)
+#define TEST_DATA_SIZE		(TEST_DATA_WIDTH * TEST_DATA_HEIGHT * TEST_DATA_DEPTH * 2)
+
 int main(int argc, char** argv)
 {
+	FILE* fp = NULL;
+	char* data = NULL;
 	vv_context* context = NULL;
-	vv_memory* memory = NULL;
-	void* ptr = NULL;
+	vv_memory* volume = NULL;
+	vv_visualizer* visualizer = NULL;
+
+	fp = fopen(TEST_DATA_PATH, "r");
+	data = calloc(TEST_DATA_SIZE, 1);
+	fread(data, 1, TEST_DATA_SIZE, fp);
+	fclose(fp);
 
 	vv_context_create(&context);
 
 	vv_memory_create
 	(
-		&memory,
-		&(const vv_memory_desc)
-		{
-			.type = VV_MEMORY_TYPE_HOST_MEMORY,
-			.width = 256,
-			.height = 256,
-			.bytes_per_channel = 2,
-		},
-		NULL
-	);
-
-	vv_memory_destroy(&memory);
-
-	vv_memory_create
-	(
-		&memory,
+		&volume,
 		&(const vv_memory_desc)
 		{
 			.type = VV_MEMORY_TYPE_GLES_TEXTURE,
 			.context = context,
-			.width = 256,
-			.height = 256,
+			.width = TEST_DATA_WIDTH,
+			.height = TEST_DATA_HEIGHT,
+			.depth = TEST_DATA_DEPTH,
 			.bytes_per_channel = 2,
 		},
-		NULL
+		data
 	);
 
-	vv_memory_destroy(&memory);
+	free(data);
 
-	vv_memory_create
-	(
-		&memory,
-		&(const vv_memory_desc)
-		{
-			.type = VV_MEMORY_TYPE_CL_BUFFER,
-			.context = context,
-			.width = 256,
-			.height = 256,
-			.bytes_per_channel = 2,
-		},
-		NULL
-	);
+	vv_visualizer_create(context, &visualizer, VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED);
+	vv_visualizer_set_viewport(visualizer, 800, 800);
+	vv_visualizer_set_volume(visualizer, volume);
+	vv_visualizer_render(visualizer);
 
-	vv_memory_map(memory, &ptr);
-	fprintf(stderr, "ptr = %p\n", ptr);
-	vv_memory_unmap(memory, &ptr);
-	fprintf(stderr, "ptr = %p\n", ptr);
-	vv_memory_destroy(&memory);
-
-	{
-		vv_visualizer* visualizer = NULL;
-		vv_visualizer_create(context, &visualizer, VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED);
-		vv_visualizer_set_viewport(visualizer, 800, 800);
-		vv_visualizer_destroy(&visualizer);
-	}
-
+	vv_visualizer_destroy(&visualizer);
+	vv_memory_destroy(&volume);
 	vv_context_destroy(&context);
 	return EXIT_SUCCESS;
 }

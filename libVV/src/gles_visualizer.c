@@ -155,6 +155,9 @@ enum vv_result gles_visualizer_set_volume(struct vv_visualizer* visualizer, stru
 	if(volume->desc.type != VV_MEMORY_TYPE_GLES_TEXTURE)
 	{
 		/* copy */
+	}else
+	{
+		gles_visualizer->texture = volume;
 	}
 
 done:
@@ -175,6 +178,9 @@ enum vv_result gles_visualizer_set_colormap(struct vv_visualizer* visualizer, st
 	if(colormap->desc.type != VV_MEMORY_TYPE_GLES_TEXTURE)
 	{
 		/* copy */
+	}else
+	{
+		gles_visualizer->colormap = colormap;
 	}
 
 done:
