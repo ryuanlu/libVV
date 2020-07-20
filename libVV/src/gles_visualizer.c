@@ -28,6 +28,8 @@ struct gles_visualizer
 	GLuint	world_loc;
 	GLuint	view_loc;
 	GLuint	projection_loc;
+	GLuint	data_loc;
+	GLuint	colormap_loc;
 
 	GLuint	fbo;
 	GLuint	vao;
@@ -72,6 +74,13 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	new_visualizer->world_loc	= glGetUniformLocation(new_visualizer->shader_program, "world");
 	new_visualizer->view_loc	= glGetUniformLocation(new_visualizer->shader_program, "view");
 	new_visualizer->projection_loc	= glGetUniformLocation(new_visualizer->shader_program, "projection");
+	new_visualizer->data_loc	= glGetUniformLocation(new_visualizer->shader_program, "data");
+	new_visualizer->colormap_loc	= glGetUniformLocation(new_visualizer->shader_program, "colormap");
+
+	glUseProgram(new_visualizer->shader_program);
+	glUniform1i(new_visualizer->data_loc, 0);
+	glUniform1i(new_visualizer->colormap_loc, 1);
+	glUseProgram(0);
 
 	visualizer->derivative = new_visualizer;
 	goto done;
@@ -268,6 +277,7 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 
 	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
 	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
+	glUseProgram(gles_visualizer->shader_program);
 	glBindVertexArray(gles_visualizer->vao);
 
 	glActiveTexture(GL_TEXTURE0);
