@@ -3,9 +3,10 @@
 uniform highp sampler3D data;
 uniform highp sampler3D colormap;
 
+in highp vec3 frag_texcoord;
 out highp vec4 fragment;
 
 void main()
 {
-	fragment = vec4(1.0, 1.0, 1.0, 1.0);
+	fragment = texture(data, frag_texcoord);
 }
