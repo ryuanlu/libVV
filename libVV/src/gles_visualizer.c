@@ -96,11 +96,12 @@ enum vv_result gles_visualizer_destroy(struct vv_visualizer* visualizer)
 	glDeleteShader(gles_visualizer->fragment_shader);
 	glDeleteShader(gles_visualizer->vertex_shader);
 
-	if(gles_visualizer->texture)
-		vv_memory_destroy(&gles_visualizer->texture);
+	/* Free these resource if they were allocated by visualizer internally */
+	// if(gles_visualizer->texture)
+	// 	vv_memory_destroy(&gles_visualizer->texture);
 
-	if(gles_visualizer->colormap)
-		vv_memory_destroy(&gles_visualizer->colormap);
+	// if(gles_visualizer->colormap)
+	// 	vv_memory_destroy(&gles_visualizer->colormap);
 
 	return result;
 }
@@ -268,10 +269,16 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
 	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
 	glBindVertexArray(gles_visualizer->vao);
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->texture->data);
+	if(gles_visualizer->texture)
+		glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->texture->data);
+
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->colormap->data);
+	if(gles_visualizer->colormap)
+		glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->colormap->data);
+
+	glUseProgram(gles_visualizer->shader_program);
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -331,6 +338,7 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 	/* Call glDrawArrays */
 	glDrawArrays(GL_TRIANGLES, 0, 6 * nr_slices);
 
+	glUseProgram(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
