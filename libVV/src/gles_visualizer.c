@@ -288,10 +288,7 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 	if(gles_visualizer->colormap)
 		glBindTexture(GL_TEXTURE_3D, (GLuint64)gles_visualizer->colormap->data);
 
-	glUseProgram(gles_visualizer->shader_program);
-
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
 
 	/* Update uniforms */
 
@@ -309,40 +306,41 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 		local[0] = 1.0;
 		local[5] = 1.0;
 		local[10] = 1.0;
-		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.depth);
+		nr_slices = visualizer->volume->desc.depth;
 		break;
 	case 1:
 		local[0] = 1.0;
 		local[5] = 1.0;
 		local[10] = -1.0;
-		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.depth);
+		nr_slices = visualizer->volume->desc.depth;
 		break;
 	case 2:
 		local[8] = 1.0;
 		local[1] = 1.0;
 		local[6] = 1.0;
-		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.height);
+		nr_slices = visualizer->volume->desc.height;
 		break;
 	case 3:
 		local[8] = 1.0;
 		local[1] = 1.0;
 		local[6] = -1.0;
-		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.height);
+		nr_slices = visualizer->volume->desc.height;
 		break;
 	case 4:
 		local[4] = 1.0;
 		local[9] = 1.0;
 		local[2] = 1.0;
-		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.width);
+		nr_slices = visualizer->volume->desc.width;
 		break;
 	case 5:
 		local[4] = 1.0;
 		local[9] = 1.0;
 		local[2] = -1.0;
-		glUniform1i(gles_visualizer->nr_slices_loc, visualizer->volume->desc.width);
+		nr_slices = visualizer->volume->desc.width;
 		break;
 	}
 
+	glUniform1i(gles_visualizer->nr_slices_loc, nr_slices);
 	glUniformMatrix4fv(gles_visualizer->local_loc, 1, GL_FALSE, local);
 
 	/* Call glDrawArrays */

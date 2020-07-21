@@ -8,5 +8,6 @@ out highp vec4 fragment;
 
 void main()
 {
-	fragment = texture(data, frag_texcoord);
+	highp float v = float(texture(data, frag_texcoord).r);
+	fragment = texture(colormap, vec3(v, 0.0, 0.0));
 }

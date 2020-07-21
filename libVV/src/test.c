@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 			data[i * 4 + 0] = i;
 			data[i * 4 + 1] = i;
 			data[i * 4 + 2] = i;
-			data[i * 4 + 3] = 255;
+			data[i * 4 + 3] = i;
 		}
 	}
 
