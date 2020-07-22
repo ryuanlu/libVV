@@ -145,6 +145,7 @@ enum vv_result gles_visualizer_set_viewport(struct vv_visualizer* visualizer, co
 #else
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GLuint64)(visualizer->framebuffer->data), 0);
 #endif
+	glViewport(0, 0, width, height);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

@@ -96,10 +96,10 @@ enum vv_result gles_texture_create(struct vv_memory* memory, void* extra)
 		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RED, GL_UNSIGNED_BYTE, extra);
 		break;
 	case 2:
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RED, GL_UNSIGNED_SHORT, extra);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RG, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RG, GL_UNSIGNED_BYTE, extra);
 		break;
 	case 4:
-		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, extra);
+		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, extra);
 		break;
 	default:
 		goto_cleanup_if(1, VV_OPERATION_NOT_SUPPORTED, texture_cleanup);
