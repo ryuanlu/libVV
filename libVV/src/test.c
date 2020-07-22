@@ -11,9 +11,10 @@
 int main(int argc, char** argv)
 {
 	FILE* fp = NULL;
-	char* data = NULL;
+	unsigned char* data = NULL;
 	vv_context* context = NULL;
 	vv_memory* volume = NULL;
+	vv_memory* colormap = NULL;
 	vv_visualizer* visualizer = NULL;
 
 	fp = fopen(TEST_DATA_PATH, "r");
@@ -40,9 +41,37 @@ int main(int argc, char** argv)
 
 	free(data);
 
+	data = calloc(4 * 256, 1);
+	{
+		int i = 0;
+		for(i = 0;i < 256;++i)
+		{
+			data[i * 4 + 0] = i;
+			data[i * 4 + 1] = i;
+			data[i * 4 + 2] = i;
+			data[i * 4 + 3] = 255;
+		}
+	}
+
+	vv_memory_create
+	(
+		&colormap,
+		&(const vv_memory_desc)
+		{
+			.type = VV_MEMORY_TYPE_GLES_TEXTURE,
+			.context = context,
+			.width = 256,
+			.bytes_per_channel = 4,
+		},
+		data
+	);
+
+	free(data);
+
 	vv_visualizer_create(context, &visualizer, VV_VISUALIZER_TYPE_3D_TEXTURE_AXIS_ALIGNED);
 	vv_visualizer_set_viewport(visualizer, 800, 800);
 	vv_visualizer_set_volume(visualizer, volume);
+	vv_visualizer_set_colormap(visualizer, colormap);
 	vv_visualizer_render(visualizer);
 
 	vv_visualizer_destroy(&visualizer);
