@@ -9,7 +9,7 @@
 #define TEST_DATA_SIZE		(TEST_DATA_WIDTH * TEST_DATA_HEIGHT * TEST_DATA_DEPTH * 2)
 
 #define COLORMAP_PATH	"../hsv.bin"
-#define COLORMAP_WIDTH	(4096)
+#define COLORMAP_WIDTH	(2048)
 
 int main(int argc, char** argv)
 {

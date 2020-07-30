@@ -184,6 +184,7 @@ enum vv_result gles_visualizer_set_colormap(struct vv_visualizer* visualizer, st
 	if(gles_visualizer->colormap)
 		vv_memory_destroy(&gles_visualizer->colormap);
 
+	goto_cleanup_if(!colormap, VV_INVALID_VALUE, done);
 	goto_cleanup_if(colormap->desc.type != VV_MEMORY_TYPE_GLES_TEXTURE, VV_OPERATION_NOT_SUPPORTED, done);
 
 	if(colormap->desc.type != VV_MEMORY_TYPE_GLES_TEXTURE)
