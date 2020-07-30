@@ -8,6 +8,9 @@
 #define TEST_DATA_DEPTH		(113)
 #define TEST_DATA_SIZE		(TEST_DATA_WIDTH * TEST_DATA_HEIGHT * TEST_DATA_DEPTH * 2)
 
+#define COLORMAP_PATH	"../hsv.bin"
+#define COLORMAP_WIDTH	(4096)
+
 int main(int argc, char** argv)
 {
 	FILE* fp = NULL;
@@ -41,17 +44,10 @@ int main(int argc, char** argv)
 
 	free(data);
 
-	data = calloc(4 * 256, 1);
-	{
-		int i = 0;
-		for(i = 0;i < 256;++i)
-		{
-			data[i * 4 + 0] = i;
-			data[i * 4 + 1] = i;
-			data[i * 4 + 2] = i;
-			data[i * 4 + 3] = i;
-		}
-	}
+	fp = fopen(COLORMAP_PATH, "r");
+	data = calloc(4 * COLORMAP_WIDTH, 1);
+	fread(data, 4 * COLORMAP_WIDTH, 1, fp);
+	fclose(fp);
 
 	vv_memory_create
 	(
@@ -60,7 +56,7 @@ int main(int argc, char** argv)
 		{
 			.type = VV_MEMORY_TYPE_GLES_TEXTURE,
 			.context = context,
-			.width = 256,
+			.width = COLORMAP_WIDTH,
 			.bytes_per_channel = 4,
 		},
 		data
