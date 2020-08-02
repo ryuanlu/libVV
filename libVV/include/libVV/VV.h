@@ -20,7 +20,7 @@ typedef struct vv_context vv_context;
 
 vv_result	vv_context_create	(vv_context** context);
 vv_result	vv_context_destroy	(vv_context** context);
-
+vv_result	vv_context_get_eglcontext(const vv_context* context, void** eglcontext);
 
 /* vv_memory */
 
