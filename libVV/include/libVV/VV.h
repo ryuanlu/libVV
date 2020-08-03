@@ -77,6 +77,7 @@ vv_result	vv_visualizer_set_volume	(vv_visualizer* visualizer, vv_memory* volume
 vv_result	vv_visualizer_set_colormap	(vv_visualizer* visualizer, vv_memory* colormap);
 
 vv_result	vv_visualizer_render	(vv_visualizer* visualizer);
+vv_result	vv_visualizer_get_pixels(vv_visualizer* visualizer, char* pixels);
 
 
 

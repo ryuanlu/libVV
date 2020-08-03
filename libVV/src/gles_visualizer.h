@@ -11,6 +11,7 @@ enum vv_result gles_visualizer_set_volume(struct vv_visualizer* visualizer, stru
 enum vv_result gles_visualizer_set_colormap(struct vv_visualizer* visualizer, struct vv_memory* colormap);
 
 enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer);
+enum vv_result gles_visualizer_get_pixels(struct vv_visualizer* visualizer, char* pixels);
 
 
 #endif /* __GLES_VISUALIZER_H__ */

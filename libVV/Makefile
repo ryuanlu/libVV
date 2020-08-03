@@ -33,7 +33,7 @@ $(BUILD_DIR)/$(LINKER_NAME): $(BUILD_DIR)/$(TARGET)
 
 $(TEST_TARGET)_src_files:=test.c
 $(TEST_TARGET)_cflags:=-Wall -Iinclude/libVV -g
-$(TEST_TARGET)_ldflags:=-Wall -Lbuild/ -lVV -lX11 -g
+$(TEST_TARGET)_ldflags:=-Wall -Lbuild/ -lVV -lX11 -lXext -g
 
 $(eval $(call define_c_target,$(TEST_TARGET),src,$(BUILD_DIR)))
 

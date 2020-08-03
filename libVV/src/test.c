@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/XShm.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
 #include "VV.h"
 
 #define TITLE_STRING	"libVV Test"
@@ -64,6 +68,9 @@ int main(int argc, char** argv)
 	XTextProperty	title;
 	XEvent		event;
 	Atom		wm_delete_window;
+	XImage*		image;
+	XShmSegmentInfo	shminfo;
+	GC		gc;
 
 	vv_context* context = NULL;
 	vv_memory* volume = NULL;
@@ -84,6 +91,13 @@ int main(int argc, char** argv)
 	XSelectInput(X_display, window, ExposureMask | KeyPressMask | StructureNotifyMask);
 	XMapWindow(X_display, window);
 
+	image = XShmCreateImage(X_display, DefaultVisual(X_display, 0), 24, ZPixmap, NULL, &shminfo, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	shminfo.shmid = shmget(IPC_PRIVATE, FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 4, IPC_CREAT|0777);
+	shminfo.shmaddr = image->data = shmat(shminfo.shmid, 0, 0);
+	shminfo.readOnly = False;
+	XShmAttach(X_display, &shminfo);
+	gc = XCreateGC(X_display, window, 0, NULL);
+
 
 	vv_context_create(&context);
 
@@ -95,23 +109,24 @@ int main(int argc, char** argv)
 
 	vv_visualizer_set_volume(visualizer, volume);
 	vv_visualizer_set_colormap(visualizer, colormap);
+
 	vv_visualizer_render(visualizer);
+	vv_visualizer_get_pixels(visualizer, image->data);
+	XShmPutImage(X_display, window, gc, image, 0, 0, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT, 0);
+	XFlush(X_display);
 
 	while(!quit)
 	{
-		if(XPending(X_display))
+		XNextEvent(X_display, &event);
+		switch(event.type)
 		{
-			XNextEvent(X_display, &event);
-			switch(event.type)
+		case ClientMessage:
+			if(event.xclient.data.l[0] == wm_delete_window)
 			{
-			case ClientMessage:
-				if(event.xclient.data.l[0] == wm_delete_window)
-				{
-					XDestroyWindow(X_display, window);
-					quit = True;
-				}
-				break;
+				XDestroyWindow(X_display, window);
+				quit = True;
 			}
+			break;
 		}
 	}
 

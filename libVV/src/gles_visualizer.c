@@ -365,3 +365,17 @@ enum vv_result gles_visualizer_render(struct vv_visualizer* visualizer)
 	return result;
 }
 
+
+enum vv_result gles_visualizer_get_pixels(struct vv_visualizer* visualizer, char* pixels)
+{
+	enum vv_result result = VV_SUCCESS;
+	struct gles_visualizer* gles_visualizer = visualizer->derivative;
+
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gles_visualizer->fbo);
+	glReadPixels(0, 0, visualizer->framebuffer->desc.width, visualizer->framebuffer->desc.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+	return result;
+}

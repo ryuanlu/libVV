@@ -30,5 +30,6 @@ typedef enum vv_result (*PFN_vv_visualizer_set_colormap)(struct vv_visualizer* v
 
 typedef enum vv_result (*PFN_vv_visualizer_render)(struct vv_visualizer* visualizer);
 
+typedef enum vv_result (*PFN_vv_visualizer_get_pixels)(struct vv_visualizer* visualizer, char* pixels);
 
 #endif /* __VISUALIZER_H__ */

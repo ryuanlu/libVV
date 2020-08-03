@@ -47,6 +47,13 @@ static PFN_vv_visualizer_render vv_visualizer_render_table[] =
 };
 
 
+static PFN_vv_visualizer_get_pixels vv_visualizer_get_pixels_table[] =
+{
+	gles_visualizer_get_pixels,
+	gles_visualizer_get_pixels,
+};
+
+
 enum vv_result vv_visualizer_create(struct vv_context* context, struct vv_visualizer** visualizer, const enum vv_visualizer_type type)
 {
 	enum vv_result result = VV_SUCCESS;
@@ -143,4 +150,14 @@ done:
 }
 
 
+enum vv_result vv_visualizer_get_pixels(struct vv_visualizer* visualizer, char* pixels)
+{
+	enum vv_result result = VV_SUCCESS;
+
+	if(vv_visualizer_get_pixels_table[visualizer->type])
+		goto_cleanup_if_failed(vv_visualizer_get_pixels_table[visualizer->type](visualizer, pixels), done);
+
+done:
+	return result;
+}
 
