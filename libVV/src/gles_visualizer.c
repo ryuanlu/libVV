@@ -66,6 +66,8 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	goto_cleanup_if_failed(gles_create_shader(new_visualizer->context, &new_visualizer->fragment_shader, VV_FRAGMENT_SHADER, frag_src, sizeof_frag_src), vertex_shader_cleanup);
 	goto_cleanup_if_failed(gles_create_program(new_visualizer->context, &new_visualizer->shader_program, new_visualizer->vertex_shader, new_visualizer->fragment_shader), fragment_shader_cleanup);
 
+	eglMakeCurrent(new_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, new_visualizer->context->context);
+
 	glGenFramebuffers(1, &new_visualizer->fbo);
 	glGenVertexArrays(1, &new_visualizer->vao);
 
@@ -92,6 +94,8 @@ vertex_shader_cleanup:
 new_visualizer_cleanup:
 	free(new_visualizer);
 done:
+	eglMakeCurrent(new_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
 	return result;
 }
 
@@ -100,6 +104,8 @@ enum vv_result gles_visualizer_destroy(struct vv_visualizer* visualizer)
 {
 	enum vv_result result = VV_SUCCESS;
 	struct gles_visualizer* gles_visualizer = visualizer->derivative;
+
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
 
 	glDeleteProgram(gles_visualizer->shader_program);
 	glDeleteShader(gles_visualizer->fragment_shader);
@@ -111,6 +117,8 @@ enum vv_result gles_visualizer_destroy(struct vv_visualizer* visualizer)
 
 	// if(gles_visualizer->colormap)
 	// 	vv_memory_destroy(&gles_visualizer->colormap);
+
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
 	return result;
 }
@@ -138,7 +146,7 @@ enum vv_result gles_visualizer_set_viewport(struct vv_visualizer* visualizer, co
 		NULL
 	);
 
-
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
 	glBindFramebuffer(GL_FRAMEBUFFER, gles_visualizer->fbo);
 #ifdef CONFIG_GLES20_COMPATIBLE
 	gles_visualizer->context->glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (GLuint64)(visualizer->framebuffer->data), 0);
@@ -148,6 +156,8 @@ enum vv_result gles_visualizer_set_viewport(struct vv_visualizer* visualizer, co
 	glViewport(0, 0, width, height);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
 	return result;
 }

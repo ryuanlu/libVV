@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GLES3/gl32.h>
+#include "context.h"
 #include "gles.h"
 #include "debug.h"
 
@@ -87,6 +88,8 @@ enum vv_result gles_texture_create(struct vv_memory* memory, void* extra)
 {
 	enum vv_result result = VV_SUCCESS;
 
+	eglMakeCurrent(memory->desc.context->gles->display, EGL_NO_SURFACE, EGL_NO_SURFACE, memory->desc.context->gles->context);
+
 	glGenTextures(1, (GLuint*)&memory->data);
 	glBindTexture(GL_TEXTURE_3D, (GLuint64)memory->data);
 
@@ -118,6 +121,8 @@ enum vv_result gles_texture_create(struct vv_memory* memory, void* extra)
 texture_cleanup:
 	glDeleteTextures(1, (GLuint*)&memory->data);
 done:
+	eglMakeCurrent(memory->desc.context->gles->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
 	return result;
 }
 
@@ -126,10 +131,12 @@ enum vv_result gles_texture_destroy(struct vv_memory* memory)
 {
 	enum vv_result result = VV_SUCCESS;
 
+	eglMakeCurrent(memory->desc.context->gles->display, EGL_NO_SURFACE, EGL_NO_SURFACE, memory->desc.context->gles->context);
 	glBindTexture(GL_TEXTURE_3D, 0);
 	goto_cleanup_if(!memory, VV_INVALID_VALUE, done);
 	glDeleteTextures(1, (GLuint*)&memory->data);
 done:
+	eglMakeCurrent(memory->desc.context->gles->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	return result;
 }
 
@@ -161,6 +168,8 @@ enum vv_result gles_create_shader(const struct gles_context* context, GLuint* sh
 	goto_cleanup_if(!context || !shader || !src, VV_INVALID_VALUE, done);
 	goto_cleanup_if(type < 0 || type >= NUMBER_OF_GLES_SHADERS, VV_INVALID_VALUE, done);
 
+	eglMakeCurrent(context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, context->context);
+
 	new_shader = glCreateShader(gles_shader_type[type]);
 	glShaderSource(new_shader, 1, &src, &length);
 	goto_cleanup_if(glGetError(), VV_FAILED_TO_INITIALIZE, new_shader_cleanup);
@@ -178,6 +187,8 @@ enum vv_result gles_create_shader(const struct gles_context* context, GLuint* sh
 new_shader_cleanup:
 	glDeleteShader(new_shader);
 done:
+	eglMakeCurrent(context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
 	return result;
 }
 
@@ -189,6 +200,8 @@ enum vv_result gles_create_program(const struct gles_context* context, GLuint* p
 
 	GLuint new_program = 0;
 	enum vv_result result = VV_SUCCESS;
+
+	eglMakeCurrent(context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, context->context);
 
 	new_program = glCreateProgram();
 	glAttachShader(new_program, vertex_shader);
@@ -208,6 +221,7 @@ enum vv_result gles_create_program(const struct gles_context* context, GLuint* p
 new_program_cleanup:
 	glDeleteProgram(new_program);
 done:
+	eglMakeCurrent(context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	return result;
 }
 
