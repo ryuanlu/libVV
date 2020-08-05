@@ -28,6 +28,11 @@ struct gles_visualizer
 	GLuint	world_loc;
 	GLuint	view_loc;
 	GLuint	projection_loc;
+
+	GLuint	width_loc;
+	GLuint	height_loc;
+	GLuint	depth_loc;
+	GLuint	threshold_loc;
 	GLuint	data_loc;
 	GLuint	colormap_loc;
 
@@ -68,6 +73,8 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 
 	eglMakeCurrent(new_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, new_visualizer->context->context);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glGenFramebuffers(1, &new_visualizer->fbo);
 	glGenVertexArrays(1, &new_visualizer->vao);
 
@@ -76,12 +83,18 @@ enum vv_result gles_visualizer_create(struct vv_visualizer* visualizer)
 	new_visualizer->world_loc	= glGetUniformLocation(new_visualizer->shader_program, "world");
 	new_visualizer->view_loc	= glGetUniformLocation(new_visualizer->shader_program, "view");
 	new_visualizer->projection_loc	= glGetUniformLocation(new_visualizer->shader_program, "projection");
+
+	new_visualizer->width_loc	= glGetUniformLocation(new_visualizer->shader_program, "width");
+	new_visualizer->height_loc	= glGetUniformLocation(new_visualizer->shader_program, "height");
+	new_visualizer->depth_loc	= glGetUniformLocation(new_visualizer->shader_program, "depth");
+	new_visualizer->threshold_loc	= glGetUniformLocation(new_visualizer->shader_program, "threshold");
 	new_visualizer->data_loc	= glGetUniformLocation(new_visualizer->shader_program, "data");
 	new_visualizer->colormap_loc	= glGetUniformLocation(new_visualizer->shader_program, "colormap");
 
 	glUseProgram(new_visualizer->shader_program);
 	glUniform1i(new_visualizer->data_loc, 0);
 	glUniform1i(new_visualizer->colormap_loc, 1);
+	glUniform1i(new_visualizer->threshold_loc, 65535);
 	glUseProgram(0);
 
 	visualizer->derivative = new_visualizer;
@@ -165,6 +178,7 @@ enum vv_result gles_visualizer_set_viewport(struct vv_visualizer* visualizer, co
 
 enum vv_result gles_visualizer_set_volume(struct vv_visualizer* visualizer, struct vv_memory* volume)
 {
+	int threshold = 0;
 	enum vv_result result = VV_SUCCESS;
 	struct gles_visualizer* gles_visualizer = visualizer->derivative;
 
@@ -180,6 +194,31 @@ enum vv_result gles_visualizer_set_volume(struct vv_visualizer* visualizer, stru
 	{
 		gles_visualizer->texture = volume;
 	}
+
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, gles_visualizer->context->context);
+	glUseProgram(gles_visualizer->shader_program);
+
+	switch(volume->desc.bytes_per_channel)
+	{
+		case 1:
+		threshold = 255;
+		break;
+		case 2:
+		threshold = 2048; /* This is for test only, it should be 65535 by default */
+		break;
+		default:
+		threshold = 65535;
+		break;
+	}
+
+	glUniform1i(gles_visualizer->threshold_loc, threshold);
+
+	glUniform1i(gles_visualizer->width_loc, volume->desc.width);
+	glUniform1i(gles_visualizer->height_loc, volume->desc.height);
+	glUniform1i(gles_visualizer->depth_loc, volume->desc.depth);
+
+	glUseProgram(0);
+	eglMakeCurrent(gles_visualizer->context->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
 done:
 	return result;

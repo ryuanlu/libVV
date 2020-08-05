@@ -103,6 +103,13 @@ enum vv_result gles_texture_create(struct vv_memory* memory, void* extra)
 		break;
 	case 4:
 		glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, memory->desc.width, memory->desc.height, memory->desc.depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, extra);
+
+		/* colormap RGBA to BGRA for test purpose */
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
+
 		break;
 	default:
 		goto_cleanup_if(1, VV_OPERATION_NOT_SUPPORTED, texture_cleanup);
