@@ -11,7 +11,7 @@ uniform highp sampler3D colormap;
 in highp vec3 frag_texcoord;
 out highp vec4 fragment;
 
-float	calculate_gradient(highp sampler3D volume, highp vec3 uvw)
+highp float calculate_gradient(highp sampler3D volume, highp vec3 uvw)
 {
 	highp vec3	result;
 	highp vec3	v[2];
