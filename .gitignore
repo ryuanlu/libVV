@@ -1,0 +1,13 @@
+*.bin
+*.bmp
+*.debug
+*.o
+*.o.d
+*.so
+.cache
+compile_commands.json
+src/test/isosurface
+src/test/volume_rendering
+src/vv/vv
+xdg-shell-client-protocol.h
+xdg-shell-protocol.c

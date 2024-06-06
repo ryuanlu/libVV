@@ -1,0 +1,16 @@
+vv [options]
+
+	-F	File format. Currently only raw is implemented. (raw)
+	-f	Voxel format: (u8, u16le, u12be, u16be)
+	-s	Dimension of the volume data in WxHxD format. (ex: 256x256x256)
+	-r	Scaling for visualization in W:H:D format. (ex: 1:1:2)
+	-i	Input volume file.
+	-I	Iso-surface-extraction
+
+Examples:
+
+	./vv -f u16be -s 256x256x113 -r 1:1:2 -i ../../data/cthead.bin
+	./vv -f u12be -s 512x512x361 -r 0.337891:0.337891:0.5 -i ../../data/bunny.bin
+	./vv -f u16be -s 256x256x113 -r 1:1:2 -i ../../data/cthead.bin -I 1500
+	./vv -f u12be -s 512x512x361 -r 0.337891:0.337891:0.5 -i ../../data/bunny.bin -I 2100
+
