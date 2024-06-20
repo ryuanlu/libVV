@@ -32,5 +32,4 @@ void wl_window_set_pointer_wheel_handler(struct wl_window* window, const PFN_POI
 void wl_window_set_redraw_handler(struct wl_window* window, const PFN_REDRAW handler);
 void wl_window_set_resize_handler(struct wl_window* window, const PFN_RESIZE handler);
 
-
 #endif /* __WAYLAND_H__ */

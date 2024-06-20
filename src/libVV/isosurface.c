@@ -76,7 +76,7 @@ static void calculate_center(const float* vertices, const int n, float* output)
 	}
 }
 
-int marching_tetrahedron(const struct volume* volume, const int x, const int y, const int z, const int iso_value, struct vertex_buffer* vertex_buffer)
+static int marching_tetrahedron(const struct volume* volume, const int x, const int y, const int z, const int iso_value, struct vertex_buffer* vertex_buffer)
 {
 	int total = 0;
 	int mode = (x + y + z) % 2;

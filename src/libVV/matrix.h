@@ -21,5 +21,4 @@ void mat4_multiplied_by_vec4(float* vec4_out, const float* mat4, const float* ve
 float vec_length(const float* vec, const int n);
 void vec_normalize(float* vec, const int n);
 
-
 #endif /* __MATRIX_H__ */

@@ -6,6 +6,9 @@
 #include "wayland.h"
 #include "viewer.h"
 
+#define DEFAULT_VIEWER_WIDTH	(800)
+#define DEFAULT_VIEWER_HEIGHT	(800)
+
 static int redraw(struct wl_window* window, void* userdata)
 {
 	struct viewer* viewer = (struct viewer*)userdata;
@@ -116,7 +119,7 @@ struct viewer* viewer_create(struct wl_client* wl, const char* title)
 
 	viewer = calloc(1, sizeof(struct viewer));
 
-	viewer->window = wl_window_create(wl, 800, 800);
+	viewer->window = wl_window_create(wl, DEFAULT_VIEWER_WIDTH, DEFAULT_VIEWER_HEIGHT);
 	viewer->distance = 1.0f;
 
 	wl_window_set_redraw_handler(viewer->window, redraw);
@@ -138,7 +141,7 @@ struct viewer* viewer_create(struct wl_client* wl, const char* title)
 void viewer_set_renderer(struct viewer* viewer, struct renderer* renderer)
 {
 	viewer->renderer = renderer;
-	renderer_resize(viewer->renderer, 800, 800);
+	renderer_resize(viewer->renderer, DEFAULT_VIEWER_WIDTH, DEFAULT_VIEWER_HEIGHT);
 	renderer_set_background_color(viewer->renderer, 1.0f, 1.0f, 1.0f, 1.0f);
 }
 

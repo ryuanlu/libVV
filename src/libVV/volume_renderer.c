@@ -38,7 +38,7 @@ static int volume_renderer_init_shaders(struct renderer* renderer)
 	return 0;
 }
 
-int volume_renderer_init(struct volume_renderer* volume_renderer)
+static int volume_renderer_init(struct volume_renderer* volume_renderer)
 {
 	float identity[16];
 
@@ -76,7 +76,7 @@ int volume_renderer_init(struct volume_renderer* volume_renderer)
 	return 0;
 }
 
-int volume_renderer_release(struct volume_renderer* volume_renderer)
+static int volume_renderer_release(struct volume_renderer* volume_renderer)
 {
 	if(!volume_renderer)
 		return 1;

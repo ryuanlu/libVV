@@ -9,7 +9,7 @@ extern const char _binary_help_txt_start;
 extern const char _binary_help_txt_end;
 #define _binary_help_txt_size	(int)(&_binary_help_txt_end - &_binary_help_txt_start)
 
-int parse_options(int argc, char** argv, struct vv_options* options)
+static int parse_options(int argc, char** argv, struct vv_options* options)
 {
 	int c;
 

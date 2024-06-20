@@ -46,6 +46,7 @@ int main(int argc, char** argv)
 	write_pixels_to_bmp("isosurface.bmp", FB_WIDTH, FB_HEIGHT, ptr);
 
 	volume_texture_destroy(volume_texture);
+	volume_destroy(volume);
 	isosurface_renderer_destroy(renderer);
 	gbm_fb_destroy(context, fb);
 	gbm_context_destroy(context);

@@ -32,7 +32,7 @@ static int isosurface_renderer_init_shaders(struct renderer* renderer)
 	return 0;
 }
 
-int isosurface_renderer_init(struct isosurface_renderer* isosurface_renderer)
+static int isosurface_renderer_init(struct isosurface_renderer* isosurface_renderer)
 {
 	float identity[16];
 
@@ -62,7 +62,7 @@ int isosurface_renderer_init(struct isosurface_renderer* isosurface_renderer)
 	return 0;
 }
 
-int isosurface_renderer_release(struct isosurface_renderer* isosurface_renderer)
+static int isosurface_renderer_release(struct isosurface_renderer* isosurface_renderer)
 {
 	if(!isosurface_renderer)
 		return 1;

@@ -1,11 +1,11 @@
 #ifndef __PANEL_H__
 #define __PANEL_H__
 
-#include <limits.h>
+#include <linux/limits.h>
 
 struct widget;
 struct panel;
-
+struct tty_device;
 
 enum mouse_button
 {

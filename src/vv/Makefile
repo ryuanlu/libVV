@@ -20,8 +20,8 @@ PKG_CONFIG_PKGS:=egl wayland-client wayland-egl gbm glesv2
 
 $(TARGET)_src_files:=bmp.c colormap.c gbm.c isosurface_extraction.c main.c panel.c tty.c viewer.c volume_rendering.c wayland.c $(XDG_SHELL_PROTOCOL_SOURCE)
 $(TARGET)_resource_files:=help.txt
-$(TARGET)_cflags:=-Wall $(shell pkgconf --cflags $(PKG_CONFIG_PKGS)) -I../libVV $(DEBUG_FLAGS)
-$(TARGET)_ldflags:=-Wall -lm $(shell pkgconf --libs $(PKG_CONFIG_PKGS)) -L ../libVV/ -lVV $(DEBUG_FLAGS)
+$(TARGET)_cflags:=$(COMMON_CFLAGS) $(DEBUG_FLAGS) $(shell pkgconf --cflags $(PKG_CONFIG_PKGS)) -I../libVV
+$(TARGET)_ldflags:=$(DEBUG_FLAGS) -lm $(shell pkgconf --libs $(PKG_CONFIG_PKGS)) -L ../libVV/ -lVV
 
 $(eval $(call define_c_targets,$(TARGET)))
 

@@ -53,6 +53,7 @@ int main(int argc, char** argv)
 
 	volume_renderer_destroy(volume_renderer);
 	volume_texture_destroy(volume_texture);
+	volume_destroy(volume);
 	gbm_fb_destroy(context, fb);
 	gbm_context_destroy(context);
 

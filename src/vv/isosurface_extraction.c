@@ -1,10 +1,12 @@
 #include <unistd.h>
+#include <threads.h>
 #include "wayland.h"
 #include "isosurface.h"
 #include "isosurface_renderer.h"
 #include "vertex_buffer.h"
 #include "viewer.h"
 #include "volume_texture.h"
+#include "isosurface_extraction.h"
 #include "vv.h"
 
 int run_iso_surface_extraction(struct volume* volume, const struct vv_options* options, const int isovalue)
@@ -33,7 +35,7 @@ int run_iso_surface_extraction(struct volume* volume, const struct vv_options* o
 			r = wl_client_dispatch(wl);
 
 		if(!r)
-			usleep(2000);
+			thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 2000000, }, NULL);
 	}
 
 	volume_texture_destroy(volume_texture);

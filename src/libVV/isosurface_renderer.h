@@ -25,5 +25,4 @@ void isosurface_renderer_destroy(struct isosurface_renderer* isosurface_renderer
 void isosurface_renderer_set_isovalue(struct isosurface_renderer* isosurface_renderer, const int isovalue);
 void isosurface_renderer_set_color(struct isosurface_renderer* isosurface_renderer, const float r, const float g, const float b, const float a);
 
-
 #endif /* __ISOSURFACE_RENDERER_H__ */

@@ -1,7 +1,7 @@
 #ifndef __VV_H__
 #define __VV_H__
 
-#include <limits.h>
+#include <linux/limits.h>
 #include "volume.h"
 
 enum vv_actions

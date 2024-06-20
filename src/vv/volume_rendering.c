@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <linux/input-event-codes.h>
 #include <wayland-client.h>
+#include <threads.h>
 #include "volume.h"
 #include "gles.h"
 #include "volume_texture.h"
@@ -16,6 +17,7 @@
 #include "tty.h"
 #include "panel.h"
 #include "vv.h"
+#include "volume_rendering.h"
 
 #define COLORMAP_LEVEL	(64)
 #define COLORMAP_HEIGHT	(32)
@@ -121,7 +123,7 @@ int run_volume_rendering(struct volume* volume, const struct vv_options* options
 
 
 		if(!r)
-			usleep(2000);
+			thrd_sleep(&(struct timespec){.tv_sec = 0, .tv_nsec = 2000000, }, NULL);
 	}
 
 	panel_destroy(panel);
