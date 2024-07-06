@@ -7,6 +7,7 @@ vv [options]
 	-i	Input volume file.
 	-I	Iso-surface-extraction
 	-d	Downscale to one eighth size.
+	-o	Write processed volume data to a new file.
 
 Examples:
 

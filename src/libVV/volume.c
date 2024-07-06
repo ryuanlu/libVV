@@ -387,6 +387,22 @@ int volume_destroy(struct volume* volume)
 	return 0;
 }
 
+int volume_write_to_file(const struct volume* volume, const char* filename)
+{
+	if(!is_volume_valid(volume))
+		return 1;
+
+	FILE* fp = fopen(filename, "w");
+
+	if(!fp)
+		return 1;
+
+	fwrite(volume->data.u8, 1, volume->datasize, fp);
+	fclose(fp);
+
+	return 0;
+}
+
 int sizeof_voxel_format(const enum voxel_format format)
 {
 	int size = 0;

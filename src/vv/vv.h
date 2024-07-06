@@ -13,7 +13,8 @@ enum vv_actions
 
 struct vv_options
 {
-	char			filename[PATH_MAX];
+	char			input_filename[PATH_MAX];
+	char			output_filename[PATH_MAX];
 	enum volume_file_type	type;
 	struct raw_params	params;
 	enum vv_actions		action;

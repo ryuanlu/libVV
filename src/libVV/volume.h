@@ -61,6 +61,7 @@ struct volume
 
 struct volume*	volume_open(const char* filename, const enum volume_file_type type, const void* parameters);
 int		volume_destroy(struct volume* volume);
+int		volume_write_to_file(const struct volume* volume, const char* filename);
 int		sizeof_voxel_format(const enum voxel_format format);
 void volume_gen_histogram(struct volume* volume, float* histogram, uint64_t* maximum, const size_t size);
 void volume_gen_2d_histogram(struct volume* volume, float* histogram, uint64_t* maximum, const size_t sizeof_value, const size_t size_magnitude);

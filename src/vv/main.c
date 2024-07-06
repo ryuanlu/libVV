@@ -21,7 +21,7 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 
 	while(1)
 	{
-		c = getopt(argc, argv, "F:f:s:r:i:I:d");
+		c = getopt(argc, argv, "F:f:s:r:i:I:do:");
 
 		if(c == -1)
 			break;
@@ -51,7 +51,7 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 			sscanf(optarg, "%f:%f:%f", &options->params.widthscale, &options->params.heightscale, &options->params.depthscale);
 			break;
 		case 'i':
-			strncpy(options->filename, optarg, PATH_MAX - 1);
+			strncpy(options->input_filename, optarg, PATH_MAX - 1);
 			break;
 		case 'I':
 			options->action = VV_ACTION_ISO_SURFACE_EXTRACTION;
@@ -59,6 +59,9 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 			break;
 		case 'd':
 			options->downscale = 1;
+			break;
+		case 'o':
+			strncpy(options->output_filename, optarg, PATH_MAX - 1);
 			break;
 		default:
 			return 1;
@@ -80,7 +83,7 @@ int main(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
-	volume = volume_open(options.filename, options.type, &options.params);
+	volume = volume_open(options.input_filename, options.type, &options.params);
 
 	if(options.downscale)
 	{
@@ -105,6 +108,15 @@ int main(int argc, char** argv)
 		break;
 	default:
 		break;
+	}
+
+	if(strlen(options.output_filename))
+	{
+		volume_write_to_file(volume, options.output_filename);
+		fprintf(stderr, "Write out ...\n\n-f %s ", volume->voxelformat == VOXEL_FORMAT_UNSIGNED_8 ? "u8" : "u16le");
+		fprintf(stderr, "-s %dx%dx%d ", volume->width, volume->height, volume->depth);
+		fprintf(stderr, "-r %1.6f:%1.6fx%1.6f ", volume->widthscale, volume->heightscale, volume->depthscale);
+		fprintf(stderr, "-i %s\n", options.output_filename);
 	}
 
 	volume_destroy(volume);
