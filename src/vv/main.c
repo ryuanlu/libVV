@@ -21,7 +21,7 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 
 	while(1)
 	{
-		c = getopt(argc, argv, "F:f:s:r:i:I:");
+		c = getopt(argc, argv, "F:f:s:r:i:I:d");
 
 		if(c == -1)
 			break;
@@ -57,6 +57,9 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 			options->action = VV_ACTION_ISO_SURFACE_EXTRACTION;
 			options->isovalue = atoi(optarg);
 			break;
+		case 'd':
+			options->downscale = 1;
+			break;
 		default:
 			return 1;
 		}
@@ -78,6 +81,13 @@ int main(int argc, char** argv)
 	}
 
 	volume = volume_open(options.filename, options.type, &options.params);
+
+	if(options.downscale)
+	{
+		struct volume* origin = volume;
+		volume = volume_create_downscaled(origin);
+		volume_destroy(origin);
+	}
 
 	if(!volume)
 	{

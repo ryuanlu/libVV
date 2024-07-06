@@ -18,6 +18,7 @@ struct vv_options
 	struct raw_params	params;
 	enum vv_actions		action;
 	int			isovalue;
+	int			downscale;
 };
 
 #endif /* __VV_H__ */

@@ -65,5 +65,7 @@ int		sizeof_voxel_format(const enum voxel_format format);
 void volume_gen_histogram(struct volume* volume, float* histogram, uint64_t* maximum, const size_t size);
 void volume_gen_2d_histogram(struct volume* volume, float* histogram, uint64_t* maximum, const size_t sizeof_value, const size_t size_magnitude);
 bool is_volume_valid(const struct volume* volume);
+struct volume*	volume_create_downscaled(const struct volume* volume);
+
 
 #endif /* __VOLUME_H__ */

@@ -576,3 +576,115 @@ void volume_gen_2d_histogram(struct volume* volume, float* histogram, uint64_t* 
 	if(maximum)
 		*maximum = max_raw;
 }
+
+struct downscale_arg
+{
+	const struct volume*	input;
+
+	struct volume_arg volume_arg;
+};
+
+
+static int downscale_thread(void* arg)
+{
+	struct volume_arg* volume_arg = (struct volume_arg*)arg;
+	struct downscale_arg* downscale_arg = container_of(volume_arg, struct downscale_arg, volume_arg);
+	struct volume* volume = volume_arg->volume;
+	const struct volume* input = downscale_arg->input;
+
+
+	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
+	{
+		int value = 0;
+		int count = 0;
+		int x, y, z;
+
+		z = 2 * (i / (volume->width * volume->height));
+		y = 2 * ((i / volume->width) % volume->height);
+		x = 2 * (i % volume->width);
+
+		for(int j = 0;j < 8;++j)
+		{
+			int dx, dy, dz;
+
+			dx = j & 0x1;
+			dy = j & 0x2;
+			dz = j & 0x4;
+
+			if((x + dx) >= input->width || (y + dy) >= input->height || (z + dz) >= input->depth)
+				continue;
+
+			switch(volume->voxelformat)
+			{
+			case VOXEL_FORMAT_UNSIGNED_8:
+				value += input->data.u8[get_index(input, x + dx, y + dy, z + dz)];
+				break;
+			case VOXEL_FORMAT_UNSIGNED_16_LE:
+				value += input->data.u16[get_index(input, x + dx, y + dy, z + dz)];
+				break;
+			default:
+				break;
+			}
+
+			++count;
+		}
+
+		value /= count;
+
+		switch(volume->voxelformat)
+		{
+		case VOXEL_FORMAT_UNSIGNED_8:
+			volume->data.u8[i] = value;
+			break;
+		case VOXEL_FORMAT_UNSIGNED_16_LE:
+			volume->data.u16[i] = value;
+			break;
+		default:
+			break;
+		}
+	}
+
+	return 0;
+}
+
+
+struct volume*	volume_create_downscaled(const struct volume* volume)
+{
+	int nr_cpu = sysconf(_SC_NPROCESSORS_ONLN);
+	struct downscale_arg* downscale_arg = calloc(1, sizeof(struct downscale_arg) * nr_cpu);
+
+	struct volume* new = NULL;
+
+	new = calloc(1, sizeof(struct volume));
+
+	new->width = volume->width / 2;
+	new->height = volume->height / 2;
+	new->depth = volume->depth / 2;
+	new->nr_voxels = new->width * new->height * new->depth;
+
+	new->widthscale = volume->widthscale;
+	new->heightscale = volume->heightscale;
+	new->depthscale = volume->depthscale;
+
+	new->voxelformat = volume->voxelformat;
+	new->datasize = new->nr_voxels * sizeof_voxel_format(new->voxelformat);
+
+	new->data.u8 = calloc(1, volume->datasize);
+
+	for(int i = 0;i < nr_cpu;++i)
+	{
+		set_range(new, &downscale_arg[i].volume_arg, i, nr_cpu);
+		downscale_arg[i].input = volume;
+		thrd_create(&downscale_arg[i].volume_arg.thread, downscale_thread, &downscale_arg[i].volume_arg);
+	}
+
+	for(int i = 0;i < nr_cpu;++i)
+		thrd_join(downscale_arg[i].volume_arg.thread, NULL);
+
+	free(downscale_arg);
+
+	new->maxvalue = volume_find_max(new);
+	volume_calculate_gradient(new);
+
+	return new;
+}
