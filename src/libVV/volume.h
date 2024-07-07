@@ -49,14 +49,7 @@ struct volume
 	int64_t	nr_voxels;
 	int64_t datasize;
 
-	int	width;
-	float	widthscale;
-	int	height;
-	float	heightscale;
-	int	depth;
-	float	depthscale;
-
-	enum voxel_format	voxelformat;
+	struct raw_params	params;
 };
 
 struct volume*	volume_open(const char* filename, const enum volume_file_type type, const void* parameters);

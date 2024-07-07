@@ -24,14 +24,14 @@ static PFN_volume_open volume_open_table[] =
 bool is_volume_valid(const struct volume* volume)
 {
 	if(
-		volume->width < 0 ||
-		volume->height < 0 ||
-		volume->depth < 0 ||
-		volume->widthscale <= 0.0 ||
-		volume->heightscale <= 0.0 ||
-		volume->depthscale <= 0.0 ||
-		volume->voxelformat < 0 ||
-		volume->voxelformat >= NUMBER_OF_VOXEL_FORMAT
+		volume->params.width < 0 ||
+		volume->params.height < 0 ||
+		volume->params.depth < 0 ||
+		volume->params.widthscale <= 0.0 ||
+		volume->params.heightscale <= 0.0 ||
+		volume->params.depthscale <= 0.0 ||
+		volume->params.voxelformat < 0 ||
+		volume->params.voxelformat >= NUMBER_OF_VOXEL_FORMAT
 	) return false;
 
 	return true;
@@ -137,7 +137,7 @@ static int find_max_thread(void* arg)
 
 	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
 	{
-		switch(volume->voxelformat)
+		switch(volume->params.voxelformat)
 		{
 		case VOXEL_FORMAT_UNSIGNED_8:
 			max = (volume_arg->volume->data.u8[i] > max) ? volume_arg->volume->data.u8[i] : max;
@@ -182,7 +182,7 @@ static int volume_find_max(struct volume* volume)
 }
 
 
-#define get_index(v, x, y, z)	(v->width * v->height * (z) + v->width * (y) + (x))
+#define get_index(v, x, y, z)	(v->params.width * v->params.height * (z) + v->params.width * (y) + (x))
 
 
 struct gradient_arg
@@ -204,23 +204,23 @@ static int calculate_gradient_thread(void* arg)
 	{
 		int x, y, z;
 
-		z = i / (volume->width * volume->height);
-		y = (i / volume->width) % volume->height;
-		x = i % volume->width;
+		z = i / (volume->params.width * volume->params.height);
+		y = (i / volume->params.width) % volume->params.height;
+		x = i % volume->params.width;
 
 		int ax, ay, az;
 		int bx, by, bz;
 
 		ax = (x == 0) ? 0 : x - 1;
-		bx = (x == (volume->width - 1)) ? (volume->width - 1) : x + 1;
+		bx = (x == (volume->params.width - 1)) ? (volume->params.width - 1) : x + 1;
 		ay = (y == 0) ? 0 : y - 1;
-		by = (y == (volume->height - 1)) ? (volume->height - 1) : y + 1;
+		by = (y == (volume->params.height - 1)) ? (volume->params.height - 1) : y + 1;
 		az = (z == 0) ? 0 : z - 1;
-		bz = (z == (volume->depth - 1)) ? (volume->depth - 1) : z + 1;
+		bz = (z == (volume->params.depth - 1)) ? (volume->params.depth - 1) : z + 1;
 
 		float gradient[4];
 
-		switch(volume->voxelformat)
+		switch(volume->params.voxelformat)
 		{
 		case VOXEL_FORMAT_UNSIGNED_8:
 			gradient[0] = (volume->data.u8[get_index(volume, bx, y, z)] - volume->data.u8[get_index(volume, ax, y, z)]) / 2.0;
@@ -308,10 +308,10 @@ static int volume_calculate_gradient(struct volume* volume)
 
 static int volume_fix_endian(struct volume* volume)
 {
-	if(!is_volume_valid(volume) || !volume->data.u8 || volume->voxelformat == VOXEL_FORMAT_UNSIGNED_8 || volume->voxelformat == VOXEL_FORMAT_UNSIGNED_16_LE)
+	if(!is_volume_valid(volume) || !volume->data.u8 || volume->params.voxelformat == VOXEL_FORMAT_UNSIGNED_8 || volume->params.voxelformat == VOXEL_FORMAT_UNSIGNED_16_LE)
 		return 1;
 
-	switch(volume->voxelformat)
+	switch(volume->params.voxelformat)
 	{
 	case VOXEL_FORMAT_UNSIGNED_12_LE:
 		volume_for_voxels(volume, VOXEL_ACTION_BIT_MASK_12);
@@ -326,7 +326,7 @@ static int volume_fix_endian(struct volume* volume)
 		break;
 	}
 
-	volume->voxelformat = VOXEL_FORMAT_UNSIGNED_16_LE;
+	volume->params.voxelformat = VOXEL_FORMAT_UNSIGNED_16_LE;
 
 	return 0;
 }
@@ -441,7 +441,7 @@ static int gen_histogram_thread(void* arg)
 
 	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
 	{
-		switch(volume->voxelformat)
+		switch(volume->params.voxelformat)
 		{
 		case VOXEL_FORMAT_UNSIGNED_8:
 			++histogram_arg->histogram[volume->data.u8[i] * histogram_arg->size / (volume->maxvalue + 1)];
@@ -525,7 +525,7 @@ static int gen_histogram2d_thread(void* arg)
 		int value = 0;
 		int magnitude = volume->gradient[i * 4 + 3] * (histogram2d_arg->size_magnitude - 1);
 
-		switch(volume->voxelformat)
+		switch(volume->params.voxelformat)
 		{
 		case VOXEL_FORMAT_UNSIGNED_8:
 			value = volume->data.u8[i] * histogram2d_arg->sizeof_value / (volume->maxvalue + 1);
@@ -615,9 +615,9 @@ static int downscale_thread(void* arg)
 		int count = 0;
 		int x, y, z;
 
-		z = 2 * (i / (volume->width * volume->height));
-		y = 2 * ((i / volume->width) % volume->height);
-		x = 2 * (i % volume->width);
+		z = 2 * (i / (volume->params.width * volume->params.height));
+		y = 2 * ((i / volume->params.width) % volume->params.height);
+		x = 2 * (i % volume->params.width);
 
 		for(int j = 0;j < 8;++j)
 		{
@@ -627,10 +627,10 @@ static int downscale_thread(void* arg)
 			dy = j & 0x2;
 			dz = j & 0x4;
 
-			if((x + dx) >= input->width || (y + dy) >= input->height || (z + dz) >= input->depth)
+			if((x + dx) >= input->params.width || (y + dy) >= input->params.height || (z + dz) >= input->params.depth)
 				continue;
 
-			switch(volume->voxelformat)
+			switch(volume->params.voxelformat)
 			{
 			case VOXEL_FORMAT_UNSIGNED_8:
 				value += input->data.u8[get_index(input, x + dx, y + dy, z + dz)];
@@ -647,7 +647,7 @@ static int downscale_thread(void* arg)
 
 		value /= count;
 
-		switch(volume->voxelformat)
+		switch(volume->params.voxelformat)
 		{
 		case VOXEL_FORMAT_UNSIGNED_8:
 			volume->data.u8[i] = value;
@@ -673,17 +673,17 @@ struct volume*	volume_create_downscaled(const struct volume* volume)
 
 	new = calloc(1, sizeof(struct volume));
 
-	new->width = volume->width / 2;
-	new->height = volume->height / 2;
-	new->depth = volume->depth / 2;
-	new->nr_voxels = new->width * new->height * new->depth;
+	new->params.width = volume->params.width / 2;
+	new->params.height = volume->params.height / 2;
+	new->params.depth = volume->params.depth / 2;
+	new->nr_voxels = new->params.width * new->params.height * new->params.depth;
 
-	new->widthscale = volume->widthscale;
-	new->heightscale = volume->heightscale;
-	new->depthscale = volume->depthscale;
+	new->params.widthscale = volume->params.widthscale;
+	new->params.heightscale = volume->params.heightscale;
+	new->params.depthscale = volume->params.depthscale;
 
-	new->voxelformat = volume->voxelformat;
-	new->datasize = new->nr_voxels * sizeof_voxel_format(new->voxelformat);
+	new->params.voxelformat = volume->params.voxelformat;
+	new->datasize = new->nr_voxels * sizeof_voxel_format(new->params.voxelformat);
 
 	new->data.u8 = calloc(1, volume->datasize);
 

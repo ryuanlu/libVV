@@ -27,11 +27,11 @@ static const int egde_indices[12] =
 	0, 3, 3, 1
 };
 
-#define get_index(x, y, z)	(volume->width * volume->height * (z) + volume->width * (y) + (x))
+#define get_index(x, y, z)	(volume->params.width * volume->params.height * (z) + volume->params.width * (y) + (x))
 
 static int get_value(const struct volume* volume, const int x, const int y, const int z)
 {
-	switch (volume->voxelformat)
+	switch (volume->params.voxelformat)
 	{
 	case VOXEL_FORMAT_UNSIGNED_16_LE:
 		return volume->data.u16[get_index(x, y, z)];
@@ -57,9 +57,9 @@ static void normalize_vertices(const struct volume* volume, int n, float* vertic
 {
 	for(int i = 0;i < n;++i)
 	{
-		vertices[i * 3 + 0] = vertices[i * 3 + 0] / volume->width - 0.5f;
-		vertices[i * 3 + 1] = vertices[i * 3 + 1] / volume->height - 0.5f;
-		vertices[i * 3 + 2] = vertices[i * 3 + 2] / volume->depth - 0.5f;
+		vertices[i * 3 + 0] = vertices[i * 3 + 0] / volume->params.width - 0.5f;
+		vertices[i * 3 + 1] = vertices[i * 3 + 1] / volume->params.height - 0.5f;
+		vertices[i * 3 + 2] = vertices[i * 3 + 2] / volume->params.depth - 0.5f;
 	}
 }
 
@@ -83,7 +83,7 @@ static int marching_tetrahedron(const struct volume* volume, const int x, const 
 	const int *tetrahedron_indices = NULL;
 	float vertices[12];
 
-	if(x > (volume->width - 2) || y > (volume->height - 2) || z > (volume->depth - 2))
+	if(x > (volume->params.width - 2) || y > (volume->params.height - 2) || z > (volume->params.depth - 2))
 		return 0;
 
 	memset(vertices, 0, sizeof(vertices));
@@ -181,9 +181,9 @@ int isosurface_extract(const struct volume* volume, const int iso_value, struct 
 	{
 		int x, y, z;
 
-		z = i / (volume->width * volume->height);
-		y = (i / volume->width) % volume->height;
-		x = i % volume->width;
+		z = i / (volume->params.width * volume->params.height);
+		y = (i / volume->params.width) % volume->params.height;
+		x = i % volume->params.width;
 
 		marching_tetrahedron(volume, x, y, z, iso_value, vertex_buffer);
 	}

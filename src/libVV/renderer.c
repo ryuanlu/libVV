@@ -66,7 +66,7 @@ int renderer_attach_volume(struct renderer* renderer, const struct volume_textur
 	struct volume* volume = volume_texture->volume;
 	renderer->volume_texture = volume_texture;
 
-	float vec[3] = {volume->widthscale * volume->width, volume->heightscale * volume->height, volume->depthscale * volume->depth};
+	float vec[3] = {volume->params.widthscale * volume->params.width, volume->params.heightscale * volume->params.height, volume->params.depthscale * volume->params.depth};
 	float scaling[16];
 
 	vec_normalize(vec, 3);

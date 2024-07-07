@@ -113,9 +113,9 @@ int main(int argc, char** argv)
 	if(strlen(options.output_filename))
 	{
 		volume_write_to_file(volume, options.output_filename);
-		fprintf(stderr, "Write out ...\n\n-f %s ", volume->voxelformat == VOXEL_FORMAT_UNSIGNED_8 ? "u8" : "u16le");
-		fprintf(stderr, "-s %dx%dx%d ", volume->width, volume->height, volume->depth);
-		fprintf(stderr, "-r %1.6f:%1.6fx%1.6f ", volume->widthscale, volume->heightscale, volume->depthscale);
+		fprintf(stderr, "Write out ...\n\n-f %s ", volume->params.voxelformat == VOXEL_FORMAT_UNSIGNED_8 ? "u8" : "u16le");
+		fprintf(stderr, "-s %dx%dx%d ", volume->params.width, volume->params.height, volume->params.depth);
+		fprintf(stderr, "-r %1.6f:%1.6fx%1.6f ", volume->params.widthscale, volume->params.heightscale, volume->params.depthscale);
 		fprintf(stderr, "-i %s\n", options.output_filename);
 	}
 

@@ -113,9 +113,9 @@ static int volume_renderer_attach_volume(struct renderer* renderer, const struct
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_INDEX_GRADIENT);
 	glBindTexture(GL_TEXTURE_3D, renderer->volume_texture->gradient);
 
-	volume_renderer->nr_x_slices = volume_texture->volume->widthscale * volume_texture->volume->width;
-	volume_renderer->nr_y_slices = volume_texture->volume->heightscale * volume_texture->volume->height;
-	volume_renderer->nr_z_slices = volume_texture->volume->depthscale * volume_texture->volume->depth;
+	volume_renderer->nr_x_slices = volume_texture->volume->params.widthscale * volume_texture->volume->params.width;
+	volume_renderer->nr_y_slices = volume_texture->volume->params.heightscale * volume_texture->volume->params.height;
+	volume_renderer->nr_z_slices = volume_texture->volume->params.depthscale * volume_texture->volume->params.depth;
 
 	return 0;
 }
