@@ -19,9 +19,11 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 		return 1;
 	}
 
+	options->params.bitmask = 16;
+
 	while(1)
 	{
-		c = getopt(argc, argv, "F:f:s:r:i:I:do:");
+		c = getopt(argc, argv, "F:f:b:s:r:i:I:do:");
 
 		if(c == -1)
 			break;
@@ -35,14 +37,15 @@ static int parse_options(int argc, char** argv, struct vv_options* options)
 		case 'f':
 			if(!strcmp("u8", optarg))
 				options->params.voxelformat = VOXEL_FORMAT_UNSIGNED_8;
-			if(!strcmp("u12le", optarg))
-				options->params.voxelformat = VOXEL_FORMAT_UNSIGNED_12_LE;
-			if(!strcmp("u12be", optarg))
-				options->params.voxelformat = VOXEL_FORMAT_UNSIGNED_12_BE;
 			if(!strcmp("u16le", optarg))
 				options->params.voxelformat = VOXEL_FORMAT_UNSIGNED_16_LE;
 			if(!strcmp("u16be", optarg))
 				options->params.voxelformat = VOXEL_FORMAT_UNSIGNED_16_BE;
+			break;
+		case 'b':
+			options->params.bitmask = atoi(optarg);
+			if(options->params.bitmask < 1 || options->params.bitmask > 16)
+				options->params.bitmask = 16;
 			break;
 		case 's':
 			sscanf(optarg, "%dx%dx%d", &options->params.width, &options->params.height, &options->params.depth);

@@ -56,66 +56,54 @@ static void set_range(struct volume* volume, struct volume_arg* arg, const int n
 		arg->end = volume->nr_voxels - 1;
 }
 
-static int mask12_thread(void* arg)
+static int convert_thread(void* arg)
 {
 	struct volume_arg* volume_arg = (struct volume_arg*)arg;
+	struct volume* volume = volume_arg->volume;
+	int bitmask = (1 << volume->params.bitmask) - 1;
 
-	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
-		volume_arg->volume->data.u16[i] &= ((1 << 12) - 1);
-
-	return 0;
-}
-
-static int bswap12_thread(void* arg)
-{
-	struct volume_arg* volume_arg = (struct volume_arg*)arg;
-
-	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
-		volume_arg->volume->data.u16[i] = bswap_16(volume_arg->volume->data.u16[i]) & ((1 << 12) - 1);
-
-	return 0;
-}
-
-static int bswap16_thread(void* arg)
-{
-	struct volume_arg* volume_arg = (struct volume_arg*)arg;
-
-	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
-		volume_arg->volume->data.u16[i] = bswap_16(volume_arg->volume->data.u16[i]);
-
-	return 0;
-}
-
-enum voxel_actions
-{
-	VOXEL_ACTION_BIT_MASK_12,
-	VOXEL_ACTION_BYTE_SWAP_12,
-	VOXEL_ACTION_BYTE_SWAP_16,
-};
-
-static int volume_for_voxels(struct volume* volume, const enum voxel_actions action)
-{
-	thrd_start_t actions[] =
+	switch (volume->params.voxelformat)
 	{
-		mask12_thread,
-		bswap12_thread,
-		bswap16_thread
-	};
+	case VOXEL_FORMAT_UNSIGNED_8:
+		for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
+			volume->data.u8[i] &= bitmask;
+		break;
+	case VOXEL_FORMAT_UNSIGNED_16_LE:
+		for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
+			volume->data.u16[i] &= bitmask;
+		break;
+	case VOXEL_FORMAT_UNSIGNED_16_BE:
+		for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
+			volume->data.u16[i] = (bswap_16(volume->data.u16[i]) & bitmask);
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+static int volume_convert_voxels(struct volume* volume)
+{
+	if(volume->params.voxelformat != VOXEL_FORMAT_UNSIGNED_16_BE && volume->params.bitmask == 16)
+		return 0;
 
 	int nr_cpu = sysconf(_SC_NPROCESSORS_ONLN);
-
 	struct volume_arg* volume_arg = calloc(1, sizeof(struct volume_arg) * nr_cpu);
 
 	for(int i = 0;i < nr_cpu;++i)
 	{
 		set_range(volume, &volume_arg[i], i, nr_cpu);
-		thrd_create(&volume_arg[i].thread, actions[action], &volume_arg[i]);
+		thrd_create(&volume_arg[i].thread, convert_thread, &volume_arg[i]);
 	}
 
 	for(int i = 0;i < nr_cpu;++i)
 		thrd_join(volume_arg[i].thread, NULL);
 
 	free(volume_arg);
+
+	if(volume->params.voxelformat == VOXEL_FORMAT_UNSIGNED_16_BE)
+		volume->params.voxelformat = VOXEL_FORMAT_UNSIGNED_16_LE;
 
 	return 0;
 }
@@ -306,31 +294,6 @@ static int volume_calculate_gradient(struct volume* volume)
 	return 0;
 }
 
-static int volume_fix_endian(struct volume* volume)
-{
-	if(!is_volume_valid(volume) || !volume->data.u8 || volume->params.voxelformat == VOXEL_FORMAT_UNSIGNED_8 || volume->params.voxelformat == VOXEL_FORMAT_UNSIGNED_16_LE)
-		return 1;
-
-	switch(volume->params.voxelformat)
-	{
-	case VOXEL_FORMAT_UNSIGNED_12_LE:
-		volume_for_voxels(volume, VOXEL_ACTION_BIT_MASK_12);
-		break;
-	case VOXEL_FORMAT_UNSIGNED_12_BE:
-		volume_for_voxels(volume, VOXEL_ACTION_BYTE_SWAP_12);
-		break;
-	case VOXEL_FORMAT_UNSIGNED_16_BE:
-		volume_for_voxels(volume, VOXEL_ACTION_BYTE_SWAP_16);
-		break;
-	default:
-		break;
-	}
-
-	volume->params.voxelformat = VOXEL_FORMAT_UNSIGNED_16_LE;
-
-	return 0;
-}
-
 struct volume* volume_open(const char* filename, const enum volume_file_type type, const void* parameters)
 {
 	struct volume* volume = NULL;
@@ -361,7 +324,7 @@ struct volume* volume_open(const char* filename, const enum volume_file_type typ
 	if(!volume)
 		return NULL;
 
-	volume_fix_endian(volume);
+	volume_convert_voxels(volume);
 
 	volume->maxvalue = volume_find_max(volume);
 
@@ -412,8 +375,6 @@ int sizeof_voxel_format(const enum voxel_format format)
 	case VOXEL_FORMAT_UNSIGNED_8:
 		size = 1;
 		break;
-	case VOXEL_FORMAT_UNSIGNED_12_LE:
-	case VOXEL_FORMAT_UNSIGNED_12_BE:
 	case VOXEL_FORMAT_UNSIGNED_16_LE:
 	case VOXEL_FORMAT_UNSIGNED_16_BE:
 		size = 2;

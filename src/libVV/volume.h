@@ -14,8 +14,6 @@ enum volume_file_type
 enum voxel_format
 {
 	VOXEL_FORMAT_UNSIGNED_8,
-	VOXEL_FORMAT_UNSIGNED_12_LE,
-	VOXEL_FORMAT_UNSIGNED_12_BE,
 	VOXEL_FORMAT_UNSIGNED_16_LE,
 	VOXEL_FORMAT_UNSIGNED_16_BE,
 	NUMBER_OF_VOXEL_FORMAT,
@@ -29,6 +27,8 @@ struct raw_params
 	float	heightscale;
 	int	depth;
 	float	depthscale;
+
+	int	bitmask;
 
 	enum voxel_format	voxelformat;
 };

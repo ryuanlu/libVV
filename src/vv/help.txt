@@ -1,7 +1,8 @@
 vv [options]
 
 	-F	File format. Currently only raw is implemented. (raw)
-	-f	Voxel format: (u8, u16le, u12be, u16be)
+	-f	Voxel format: (u8, u16le, u16be)
+	-b	Set bitmask. (default: 16)
 	-s	Dimension of the volume data in WxHxD format. (ex: 256x256x256)
 	-r	Scaling for visualization in W:H:D format. (ex: 1:1:2)
 	-i	Input volume file.

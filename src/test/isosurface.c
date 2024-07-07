@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 	params.heightscale = 1.0f;
 	params.depthscale = 2.0f;
 	params.voxelformat = VOXEL_FORMAT_UNSIGNED_16_BE;
+	params.bitmask = 16;
 
 	volume = volume_open("../../data/cthead.bin", VOLUME_FILE_TYPE_RAW, &params);
 

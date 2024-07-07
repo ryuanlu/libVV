@@ -21,6 +21,7 @@ int raw_open(FILE* fp, struct volume* volume, const void* raw_params)
 	volume->params.depthscale	= params->depthscale <= 0.0 ? 1.0 : params->depthscale;
 
 	volume->params.voxelformat = params->voxelformat;
+	volume->params.bitmask = params->bitmask;
 
 	if(!is_volume_valid(volume))
 		return 1;
