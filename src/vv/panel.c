@@ -72,6 +72,10 @@ static int panel_redraw(struct widget* widget, struct tty_device* tty)
 	tty_device_set_cursor_position(tty, 11, 4);
 	tty_device_write(tty, "Histogram");
 
+	tty_device_set_cursor_position(tty, 74, 21);
+	snprintf(buf, sizeof(buf), "%5d", panel->max);
+	tty_device_write(tty, buf);
+
 	tty_device_set_cursor_position(tty, 9, 21);
 
 	for(int i = 0;i < HISTOGRAM_LEVEL;++i)
@@ -271,6 +275,11 @@ void panel_set_colormap(struct panel* panel, const unsigned char* colormap)
 void panel_set_filename(struct panel* panel, const char* filename)
 {
 	strncpy(panel->filename, filename, PATH_MAX - 1);
+}
+
+void panel_set_max(struct panel* panel, const int max)
+{
+	panel->max = max;
 }
 
 void panel_set_colormap_changed_handler(struct panel* panel, PFN_PANEL_COLORMAP_CHANGED handler)

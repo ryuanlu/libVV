@@ -56,6 +56,7 @@ struct panel
 	float*		histogram;
 	unsigned char*	colormap;
 	char		filename[PATH_MAX];
+	int		max;
 
 	int		highlight;
 	int		select_mode;
@@ -75,6 +76,7 @@ void panel_destroy(struct panel* panel);
 void panel_set_histogram(struct panel* panel, const float* histogram);
 void panel_set_colormap(struct panel* panel, const unsigned char* colormap);
 void panel_set_filename(struct panel* panel, const char* filename);
+void panel_set_max(struct panel* panel, const int max);
 void panel_set_colormap_changed_handler(struct panel* panel, PFN_PANEL_COLORMAP_CHANGED handler);
 void panel_set_keyboard_handler(struct panel* panel, PFN_PANEL_KEYBOARD handler);
 void panel_set_userdata(struct panel* panel, void* userdata);

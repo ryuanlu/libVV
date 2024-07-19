@@ -102,6 +102,7 @@ int run_volume_rendering(struct volume* volume, const struct vv_options* options
 	tty_device_set_title(tty, "Volume Visualizer");
 	tty_device_set_root_widget(tty, &panel->widget);
 	panel_set_filename(panel, options->input_filename);
+	panel_set_max(panel, volume->maxvalue);
 	panel_set_histogram(panel, histogram);
 	panel_set_colormap(panel, colormap);
 	panel_set_userdata(panel, viewer);
