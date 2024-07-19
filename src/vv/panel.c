@@ -201,7 +201,8 @@ static int panel_mouse_wheel(struct widget* widget, struct tty_device* tty, cons
 		int opacity = panel->colormap[i * 4 + 3] + value * 5;
 		opacity = opacity < 0 ? 0 : opacity;
 		opacity = opacity > 255 ? 255 : opacity;
-		panel->colormap[i * 4 + 3] = opacity;
+		for(int j = 0;j < HISTOGRAM_HEIGHT * 2;++j)
+			panel->colormap[j * HISTOGRAM_LEVEL * 4 + i * 4 + 3] = opacity;
 	}
 
 	panel_redraw(widget, tty);
