@@ -106,3 +106,22 @@ GLuint gles_create_and_link_program(const GLuint vert_shader, const GLuint frag_
 
 	return program;
 }
+
+void gles_get_viewport(int* width, int* height)
+{
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	if(width)
+		*width = viewport[2];
+
+	if(height)
+		*height = viewport[3];
+}
+
+void gles_read_pixels(char* pixels)
+{
+	int width = 0, height = 0;
+	gles_get_viewport(&width, &height);
+	glReadPixels(0, 0, width, height, 0x80E1 /* GL_BGRA */, GL_UNSIGNED_BYTE, pixels);
+}

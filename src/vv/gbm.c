@@ -100,7 +100,7 @@ char* gbm_fb_read_pixels(struct gbm_fb* fb)
 		fb->pixels = calloc(1, 4 * fb->width * fb->height);
 	}
 
-	glReadPixels(0, 0, fb->width, fb->height, 0x80E1 /* GL_BGRA */, GL_UNSIGNED_BYTE, fb->pixels);
+	gles_read_pixels(fb->pixels);
 
 	return fb->pixels;
 }

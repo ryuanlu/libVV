@@ -10,5 +10,7 @@ const EGLint* gles_get_egl_context_attributes(void);
 EGLConfig gles_get_eglconfig(EGLDisplay display);
 GLuint gles_create_shader(const char* src, const int length, GLenum type);
 GLuint gles_create_and_link_program(const GLuint vert_shader, const GLuint frag_shader);
+void gles_get_viewport(int* width, int* height);
+void gles_read_pixels(char* pixels);
 
 #endif /* __GLES_H__ */

@@ -1,10 +1,15 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <linux/limits.h>
 #include <linux/input-event-codes.h>
 #include <wayland-client.h>
 #include "matrix.h"
 #include "renderer.h"
 #include "wayland.h"
 #include "viewer.h"
+#include "gles.h"
+#include "bmp.h"
 
 #define DEFAULT_VIEWER_WIDTH	(800)
 #define DEFAULT_VIEWER_HEIGHT	(800)
@@ -97,6 +102,21 @@ static int keyboard(struct wl_window* window, const int key, const int state, vo
 		ambient -= 0.1f;
 		renderer_set_ambient(viewer->renderer, ambient);
 		redraw(viewer->window, viewer);
+	}
+
+	if(key == KEY_S && state == WL_KEYBOARD_KEY_STATE_PRESSED)
+	{
+		char* pixel = NULL;
+		int w, h;
+		char filename[PATH_MAX];
+
+		gles_get_viewport(&w, &h);
+		pixel = calloc(1, w * h * 4);
+		renderer_redraw(viewer->renderer);
+		gles_read_pixels(pixel);
+		snprintf(filename, PATH_MAX - 1, "%ld.bmp", time(NULL));
+		write_pixels_to_bmp(filename, w, h, pixel);
+		free(pixel);
 	}
 
 	if(viewer->keyboard_handler)
