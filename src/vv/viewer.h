@@ -18,6 +18,7 @@ struct viewer
 	int	prev_y;
 	float	rotation[16];
 	float	distance;
+	float	slicing_ratio;
 
 	struct wl_window* window;
 

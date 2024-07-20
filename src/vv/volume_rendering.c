@@ -39,6 +39,7 @@ static int viewer_keyboard(struct wl_window* window, const int key, const int st
 
 	static int lighting = 0;
 	static int auto_opacity = 0;
+	static float slicing_ratio = 2.0f;
 
 	if(key == KEY_L && state == WL_KEYBOARD_KEY_STATE_PRESSED)
 	{
@@ -51,6 +52,24 @@ static int viewer_keyboard(struct wl_window* window, const int key, const int st
 	{
 		auto_opacity = !auto_opacity;
 		volume_renderer_set_auto_opacity(volume_renderer, auto_opacity);
+		viewer_redraw(viewer);
+	}
+
+	if(key == KEY_LEFTBRACE && state == WL_KEYBOARD_KEY_STATE_PRESSED)
+	{
+		slicing_ratio -= 0.5f;
+
+		if(slicing_ratio < 0.5f)
+			slicing_ratio = 0.5f;
+
+		volume_renderer_set_slicing_ratio(volume_renderer, slicing_ratio);
+		viewer_redraw(viewer);
+	}
+
+	if(key == KEY_RIGHTBRACE && state == WL_KEYBOARD_KEY_STATE_PRESSED)
+	{
+		slicing_ratio += 0.5f;
+		volume_renderer_set_slicing_ratio(volume_renderer, slicing_ratio);
 		viewer_redraw(viewer);
 	}
 
