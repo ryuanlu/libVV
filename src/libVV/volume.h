@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+struct octree_node;
+
 enum volume_file_type
 {
 	VOLUME_FILE_TYPE_RAW,
@@ -43,6 +45,7 @@ struct volume
 
 	float*	gradient;
 
+	struct octree_node* octree_node;
 	int	maxvalue;
 	float	max_gradient_length;
 

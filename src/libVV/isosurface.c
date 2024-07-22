@@ -4,6 +4,7 @@
 #include "isosurface.h"
 #include "volume.h"
 #include "vertex_buffer.h"
+#include "octree.h"
 
 static const int tetrahedron_index_table[40] =
 {
@@ -175,18 +176,41 @@ static int marching_tetrahedron(const struct volume* volume, const int x, const 
 	return total;
 }
 
+static void traverse(const struct octree_node* octree_node, const struct volume* volume, const int iso_value, struct vertex_buffer* vertex_buffer)
+{
+	if(iso_value > octree_node->maximum || iso_value < octree_node->minimum)
+		return;
+
+	if(octree_node->children[0])
+	{
+		for(int i = 0;i < 8;++i)
+		{
+			traverse(&volume->octree_node[octree_node->children[i]], volume, iso_value, vertex_buffer);
+		}
+
+		return;
+	}
+
+
+	for(int z = octree_node->begin.z;z <= octree_node->end.z;++z)
+	{
+		for(int y = octree_node->begin.y;y <= octree_node->end.y;++y)
+		{
+			for(int x = octree_node->begin.x;x <= octree_node->end.x;++x)
+			{
+				marching_tetrahedron(volume, x, y, z, iso_value, vertex_buffer);
+			}
+		}
+	}
+
+	return;
+}
+
 int isosurface_extract(const struct volume* volume, const int iso_value, struct vertex_buffer* vertex_buffer)
 {
-	for(int i = 0;i < volume->nr_voxels;++i)
-	{
-		int x, y, z;
+	struct octree_node* node = volume->octree_node;
 
-		z = i / (volume->params.width * volume->params.height);
-		y = (i / volume->params.width) % volume->params.height;
-		x = i % volume->params.width;
-
-		marching_tetrahedron(volume, x, y, z, iso_value, vertex_buffer);
-	}
+	traverse(node, volume, iso_value, vertex_buffer);
 
 	return 0;
 }

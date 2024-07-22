@@ -8,6 +8,7 @@
 #include "volume.h"
 #include "raw.h"
 #include "matrix.h"
+#include "octree.h"
 
 #define container_of(ptr, type, member) (type *)((char *)(ptr) - (char *) &((type *)0)->member)
 
@@ -107,68 +108,6 @@ static int volume_convert_voxels(struct volume* volume)
 
 	return 0;
 }
-
-struct findmax_arg
-{
-	int	max;
-
-	struct volume_arg	volume_arg;
-};
-
-static int find_max_thread(void* arg)
-{
-	struct volume_arg* volume_arg = (struct volume_arg*)arg;
-	struct findmax_arg* findmax_arg = container_of(volume_arg, struct findmax_arg, volume_arg);
-	struct volume* volume = volume_arg->volume;
-
-	int max = 0;
-
-	for(size_t i = volume_arg->begin;i <= volume_arg->end;++i)
-	{
-		switch(volume->params.voxelformat)
-		{
-		case VOXEL_FORMAT_UNSIGNED_8:
-			max = (volume_arg->volume->data.u8[i] > max) ? volume_arg->volume->data.u8[i] : max;
-			break;
-		case VOXEL_FORMAT_UNSIGNED_16_LE:
-			max = (volume_arg->volume->data.u16[i] > max) ? volume_arg->volume->data.u16[i] : max;
-			break;
-		default:
-			break;
-		}
-	}
-
-	findmax_arg->max = max;
-
-	return 0;
-}
-
-static int volume_find_max(struct volume* volume)
-{
-	int max = 0;
-
-	int nr_cpu = sysconf(_SC_NPROCESSORS_ONLN);
-
-	struct findmax_arg* findmax_arg = calloc(1, sizeof(struct findmax_arg) * nr_cpu);
-
-	for(int i = 0;i < nr_cpu;++i)
-	{
-		set_range(volume, &findmax_arg[i].volume_arg, i, nr_cpu);
-		thrd_create(&findmax_arg[i].volume_arg.thread, find_max_thread, &findmax_arg[i].volume_arg);
-	}
-
-	for(int i = 0;i < nr_cpu;++i)
-	{
-		thrd_join(findmax_arg[i].volume_arg.thread, NULL);
-		if(max < findmax_arg[i].max)
-			max = findmax_arg[i].max;
-	}
-
-	free(findmax_arg);
-
-	return max;
-}
-
 
 #define get_index(v, x, y, z)	(v->params.width * v->params.height * (z) + v->params.width * (y) + (x))
 
@@ -326,7 +265,8 @@ struct volume* volume_open(const char* filename, const enum volume_file_type typ
 
 	volume_convert_voxels(volume);
 
-	volume->maxvalue = volume_find_max(volume);
+	volume->octree_node = octree_create(volume);
+	volume->maxvalue = volume->octree_node[0].maximum;
 
 	volume_calculate_gradient(volume);
 
@@ -341,6 +281,9 @@ int volume_destroy(struct volume* volume)
 
 	if(volume->data.u8)
 		free(volume->data.u8);
+
+	if(volume->octree_node)
+		free(volume->octree_node);
 
 	if(volume->gradient)
 		free(volume->gradient);
@@ -660,7 +603,8 @@ struct volume*	volume_create_downscaled(const struct volume* volume)
 
 	free(downscale_arg);
 
-	new->maxvalue = volume_find_max(new);
+	new->octree_node = octree_create(new);
+	new->maxvalue = new->octree_node[0].maximum;
 	volume_calculate_gradient(new);
 
 	return new;
