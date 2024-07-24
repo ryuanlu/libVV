@@ -87,13 +87,12 @@ static int marching_tetrahedron(const struct volume* volume, const int x, const 
 	if(x > (volume->params.width - 2) || y > (volume->params.height - 2) || z > (volume->params.depth - 2))
 		return 0;
 
-	memset(vertices, 0, sizeof(vertices));
-
 	for(int tetrahedron = 0;tetrahedron < 5;++tetrahedron)
 	{
 		int count = 0;
 		int tetrahedron_vertices[12];
 
+		memset(vertices, 0, sizeof(vertices));
 		tetrahedron_indices = &tetrahedron_index_table[mode * 5 * 4 + tetrahedron * 4];
 
 		for(int vertex = 0;vertex < 4;++vertex)
