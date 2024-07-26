@@ -58,9 +58,9 @@ static void normalize_vertices(const struct volume* volume, int n, float* vertic
 {
 	for(int i = 0;i < n;++i)
 	{
-		vertices[i * 3 + 0] = vertices[i * 3 + 0] / volume->params.width - 0.5f;
-		vertices[i * 3 + 1] = vertices[i * 3 + 1] / volume->params.height - 0.5f;
-		vertices[i * 3 + 2] = vertices[i * 3 + 2] / volume->params.depth - 0.5f;
+		vertices[i * 3 + 0] = vertices[i * 3 + 0] / (volume->params.width - 1) - 0.5f;
+		vertices[i * 3 + 1] = vertices[i * 3 + 1] / (volume->params.height - 1) - 0.5f;
+		vertices[i * 3 + 2] = vertices[i * 3 + 2] / (volume->params.depth -1) - 0.5f;
 	}
 }
 
@@ -130,9 +130,11 @@ static int marching_tetrahedron(const struct volume* volume, const int x, const 
 
 			if((value_a <= iso_value && iso_value <= value_b) || (value_b <= iso_value && iso_value <= value_a))
 			{
-				rx = (float)(iso_value - value_a) * (xb - xa) / (value_b - value_a) + xa;
-				ry = (float)(iso_value - value_a) * (yb - ya) / (value_b - value_a) + ya;
-				rz = (float)(iso_value - value_a) * (zb - za) / (value_b - value_a) + za;
+				float r = (float)(iso_value - value_a) / (value_b - value_a);
+
+				rx = r * (xb - xa) + xa;
+				ry = r * (yb - ya) + ya;
+				rz = r * (zb - za) + za;
 
 				if(!is_dup(vertices, 4, rx, ry, rz))
 				{
