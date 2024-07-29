@@ -33,11 +33,11 @@ static int octree_insert(const struct volume* volume, struct octree* octree, con
 
 	if(level == 0)
 	{
-		for(int z = begin_z;z <= end_z;++z)
+		for(int z = begin_z;z <= end_z + 1;++z)
 		{
-			for(int y = begin_y;y <= end_y;++y)
+			for(int y = begin_y;y <= end_y + 1;++y)
 			{
-				for(int x = begin_x;x <= end_x;++x)
+				for(int x = begin_x;x <= end_x + 1;++x)
 				{
 					int value = 0;
 
@@ -112,7 +112,7 @@ struct octree_node* octree_create(const struct volume* volume)
 	octree.nr_nodes = (1 - (8 << (3 * min_level))) / -7;
 	octree.nodes = calloc(1, sizeof(struct octree_node) * octree.nr_nodes);
 
-	octree_insert(volume, &octree, min_level, 0, 0, 0, volume->params.width - 1, volume->params.height - 1, volume->params.depth - 1);
+	octree_insert(volume, &octree, min_level, 0, 0, 0, volume->params.width - 2, volume->params.height - 2, volume->params.depth - 2);
 
 	return octree.nodes;
 }
