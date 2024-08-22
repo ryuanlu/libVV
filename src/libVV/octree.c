@@ -117,3 +117,53 @@ struct octree_node* octree_create(const struct volume* volume)
 	return octree.nodes;
 }
 
+struct octree_node_queue* octree_node_queue_create(void)
+{
+	struct octree_node_queue* queue = NULL;
+	queue = calloc(1, sizeof(struct octree_node_queue));
+
+	queue->max_count = 4096;
+	queue->node = calloc(queue->max_count, sizeof(struct octree_node*));
+
+	return queue;
+}
+
+int octree_node_queue_destroy(struct octree_node_queue* queue)
+{
+	free(queue->node);
+	free(queue);
+
+	return 0;
+}
+
+int octree_node_queue_push(struct octree_node_queue* queue, const struct octree_node* octree_node)
+{
+	if(queue->max_count == queue->count)
+		return 1;
+
+	queue->node[queue->count] = octree_node;
+	++queue->count;
+
+	return 0;
+}
+
+void octree_find_value(const struct octree_node* root, const struct octree_node* octree_node, const int value, struct octree_node_queue* queue)
+{
+	if(value > octree_node->maximum || value < octree_node->minimum)
+		return;
+
+	if(octree_node->children[0])
+	{
+		for(int i = 0;i < 8;++i)
+		{
+			octree_find_value(root, &root[octree_node->children[i]], value, queue);
+		}
+
+		return;
+	}
+
+	octree_node_queue_push(queue, octree_node);
+
+	return;
+}
+

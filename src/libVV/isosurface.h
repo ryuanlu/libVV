@@ -6,5 +6,6 @@ struct volume;
 struct vertex_buffer;
 
 int isosurface_extract(const struct volume* volume, const int iso_value, struct vertex_buffer* vertex_buffer);
+int isosurface_extract_mt(const struct volume* volume, const int iso_value, struct vertex_buffer* vertex_buffer);
 
 #endif /* __ISO_SURFACE_H__ */

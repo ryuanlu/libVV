@@ -128,7 +128,8 @@ void isosurface_renderer_set_isovalue(struct isosurface_renderer* isosurface_ren
 	}
 
 	vertex_buffer_clear(isosurface_renderer->vertex_buffer);
-	isosurface_extract(isosurface_renderer->renderer.volume_texture->volume, isovalue, isosurface_renderer->vertex_buffer);
+	// isosurface_extract(isosurface_renderer->renderer.volume_texture->volume, isovalue, isosurface_renderer->vertex_buffer);
+	isosurface_extract_mt(isosurface_renderer->renderer.volume_texture->volume, isovalue, isosurface_renderer->vertex_buffer);
 
 	glBindVertexArray(isosurface_renderer->vao);
 	glBindBuffer(GL_ARRAY_BUFFER, isosurface_renderer->vbo);

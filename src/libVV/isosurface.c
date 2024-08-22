@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <threads.h>
+#include <unistd.h>
 #include "isosurface.h"
 #include "volume.h"
 #include "vertex_buffer.h"
@@ -215,3 +217,85 @@ int isosurface_extract(const struct volume* volume, const int iso_value, struct 
 
 	return 0;
 }
+
+struct thread_arg
+{
+	int	iso_value;
+	thrd_t	thread;
+
+	const struct octree_node_queue* queue;
+
+	int	begin;
+	int	end;
+
+	const struct volume* volume;
+	struct vertex_buffer* vertex_buffer;
+};
+
+static int isosurface_thread(void* arg)
+{
+	struct thread_arg* thread_arg = arg;
+
+	for(int i = thread_arg->begin;i <= thread_arg->end;++i)
+	{
+		const struct octree_node* octree_node = thread_arg->queue->node[i];
+
+		for(int z = octree_node->begin.z;z <= octree_node->end.z;++z)
+		{
+			for(int y = octree_node->begin.y;y <= octree_node->end.y;++y)
+			{
+				for(int x = octree_node->begin.x;x <= octree_node->end.x;++x)
+				{
+					marching_tetrahedron(thread_arg->volume, x, y, z, thread_arg->iso_value, thread_arg->vertex_buffer);
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int isosurface_extract_mt(const struct volume* volume, const int iso_value, struct vertex_buffer* vertex_buffer)
+{
+	struct octree_node* node = volume->octree_node;
+	struct octree_node_queue* queue = octree_node_queue_create();
+	int nr_cpu = sysconf(_SC_NPROCESSORS_ONLN);
+	struct thread_arg* thread_arg = calloc(1, sizeof(struct thread_arg) * nr_cpu);
+
+	octree_find_value(node, node, iso_value, queue);
+
+	for(int i = 0;i < nr_cpu;++i)
+	{
+		int s = queue->count / nr_cpu + !!(queue->count % nr_cpu);
+
+		thread_arg[i].iso_value = iso_value;
+		thread_arg[i].queue = queue;
+		thread_arg[i].volume = volume;
+		thread_arg[i].begin = s * i;
+		thread_arg[i].end = s * (i + 1) - 1;
+
+		if(thread_arg[i].end >= queue->count)
+			thread_arg[i].end = queue->count - 1;
+
+		thread_arg[i].vertex_buffer = vertex_buffer_create(4096);
+
+		thrd_create(&thread_arg[i].thread, isosurface_thread, &thread_arg[i]);
+
+	}
+
+	for(int i = 0;i < nr_cpu;++i)
+		thrd_join(thread_arg[i].thread, NULL);
+
+	for(int i = 0;i < nr_cpu;++i)
+		vertex_buffer_merge(vertex_buffer, thread_arg[i].vertex_buffer);
+
+	for(int i = 0;i < nr_cpu;++i)
+		vertex_buffer_destroy(thread_arg[i].vertex_buffer);
+
+	free(thread_arg);
+
+	octree_node_queue_destroy(queue);
+
+	return 0;
+}
+
