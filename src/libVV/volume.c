@@ -49,9 +49,11 @@ struct volume_arg
 
 static void set_range(struct volume* volume, struct volume_arg* arg, const int nth, const int total)
 {
+	int s = volume->nr_voxels / total + !!(volume->nr_voxels % total);
+
 	arg->volume = volume;
-	arg->begin = volume->nr_voxels / total * nth;
-	arg->end = volume->nr_voxels / total * (nth + 1) - 1;
+	arg->begin = s * nth;
+	arg->end = s * (nth + 1) - 1;
 
 	if(arg->end >= volume->nr_voxels)
 		arg->end = volume->nr_voxels - 1;
